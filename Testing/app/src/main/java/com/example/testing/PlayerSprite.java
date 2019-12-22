@@ -1,5 +1,6 @@
 package com.example.testing;
 
+import android.app.Activity;
 import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.graphics.Color;
