@@ -9,6 +9,8 @@ import android.view.SurfaceView;
 
 public class GameView extends SurfaceView implements SurfaceHolder.Callback {
     private MainThread thread;
+    public PlayerSprite p1;
+
     public GameView(Context context) {
         super(context);
         getHolder().addCallback(this);
@@ -18,6 +20,8 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
 
     @Override
     public void surfaceCreated(SurfaceHolder holder) {
+        p1 = new PlayerSprite();
+
         thread.setRunning(true);
         thread.start();
     }
@@ -42,16 +46,15 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
 
     }
     public void update() {
-
+        p1.update();
     }
     @Override
     public void draw(Canvas canvas) {
         super.draw(canvas);
         if (canvas != null) {
-            canvas.drawColor(Color.WHITE);
-            Paint paint = new Paint();
-            paint.setColor(Color.rgb(0, 100, 100));
-            canvas.drawRect(100, 100, 200, 200, paint);
+            canvas.drawColor(Color.LTGRAY);
+            p1.draw(canvas);
+
         }
     }
 }
