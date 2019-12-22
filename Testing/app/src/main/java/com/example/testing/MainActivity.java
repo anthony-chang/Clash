@@ -22,7 +22,5 @@ public class MainActivity extends Activity {
         Intent start = new Intent(this, MovePlayer.class);
         startActivity(start);
 
-
-
     }
 }
