@@ -19,23 +19,19 @@ public class PlayerSprite {
         vx = vy = ax = ay = 0;
     }
     public void update(Canvas canvas, double sensorX, double sensorY) {
-        ax = 0.5*sensorX;
-        ay = 0.5*sensorY;
-        vx+=ax;
-        if(vx>0) vx = Math.min(vx, 30);
-        else vx = Math.max(vx, -30);
-        vy+=ay;
-        if(vy>0) vy = Math.min(vy, 30);
-        else vy = Math.max(vy, -30);
+        ax = sensorX;
+        ay = sensorY;
+        vx = (vx + ax)*0.85;
+        vy = (vy + ay)*0.85;
         x+=vx;
         y+=vy;
         if (x > screenWidth - width || x < 0) {
-            vx *= -0.2;
+            vx *= -1;
             if (x<0) x = 0;
             if (x > screenWidth - width) x = screenWidth - width;
         }
         if (y > screenHeight - height || y < 0) {
-            vy *= -0.2;
+            vy *= -1;
             if (y<0) y = 0;
             if (y > screenHeight - height) y = screenHeight - height;
         }

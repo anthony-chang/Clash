@@ -22,7 +22,7 @@ public class MovePlayer extends Activity implements SensorEventListener {
     @Override
     public void onSensorChanged(SensorEvent event) {
         try {
-            Thread.sleep(20);
+            Thread.sleep(10);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
