@@ -5,9 +5,10 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 
 public class PlayerSprite {
-    Texture playerImage;
-    Sprite playerSprite;
-    private float x, y, vx, vy, ax, ay;
+    private Texture playerImage;
+    private Sprite playerSprite;
+    public float x, y, vx, vy, ax, ay;
+    public boolean movingRight, movingLeft, movingUp, movingDown;
 
     public PlayerSprite(int playerNumber) {
         if(playerNumber == 1) {
@@ -22,39 +23,28 @@ public class PlayerSprite {
         }
         playerSprite = new Sprite(playerImage);
         playerSprite.setPosition(x, y);
+        movingRight = movingLeft = movingUp = movingDown = false;
     }
     public Sprite getSprite() {
         return playerSprite;
     }
-    public float getX() {
-        return x;
-    }
-    public float getY() {
-        return y;
-    }
-    public float getVelocityX() {
-        return vx;
-    }
-    public float getVelocityY() {
-        return vy;
-    }
-    public void getInput(boolean left, boolean right, boolean up, boolean down) {
-        if(left) {
+    public void movePlayer() {
+        if(movingLeft) {
             movePlayer(-1, 0);
         }
-        if(right) {
+        if(movingRight) {
             movePlayer(1, 0);
         }
-        if(up) {
+        if(movingUp) {
             movePlayer(0, 1);
         }
-        if(down) {
+        if(movingDown) {
             movePlayer(0, -1);
         }
     }
     public void movePlayer(float accelerationX, float accelerationY) {
-        ax = accelerationX*0.1f;
-        ay = accelerationY*0.1f;
+        ax = accelerationX*0.2f;
+        ay = accelerationY*0.2f;
 
         vx += ax;
         vy += ay;
