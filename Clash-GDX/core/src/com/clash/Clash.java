@@ -5,13 +5,12 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 
 public class Clash extends ApplicationAdapter implements InputProcessor {
 	private SpriteBatch batch;
-	private Texture p1_img;
 	private PlayerSprite p1;
+	private boolean accelerometerAvailable;
 	
 	@Override
 	public void create () {
@@ -19,11 +18,13 @@ public class Clash extends ApplicationAdapter implements InputProcessor {
 		p1 = new PlayerSprite(1);
 
 		Gdx.input.setInputProcessor(this);
+		accelerometerAvailable = Gdx.input.isPeripheralAvailable(Input.Peripheral.Accelerometer);
 	}
 
 	@Override
 	public void render () {
 		p1.movePlayer();
+		p1.movePlayer(Gdx.input.getAccelerometerY(), -Gdx.input.getAccelerometerX());
 		p1.movePlayer(p1.vx*-0.3f, p1.vy*-0.3f); //friction
 
 		Gdx.gl.glClearColor(0, 0, 0, 1);
@@ -35,7 +36,6 @@ public class Clash extends ApplicationAdapter implements InputProcessor {
 	
 	@Override
 	public void dispose () {
-		p1_img.dispose();
 		batch.dispose();
 	}
 
@@ -74,6 +74,9 @@ public class Clash extends ApplicationAdapter implements InputProcessor {
 
 	@Override
 	public boolean touchDown(int screenX, int screenY, int pointer, int button) {
+		/*Remove later*/
+		p1.x = screenX;
+		p1.y = Gdx.graphics.getHeight() - screenY;
 		return false;
 	}
 
