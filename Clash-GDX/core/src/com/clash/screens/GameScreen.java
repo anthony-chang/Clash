@@ -10,12 +10,10 @@ public class GameScreen implements Screen {
     private World world;
     private Box2DDebugRenderer debugRenderer;
     private OrthographicCamera camera;
-    private Body playerBody;
-    private Vector2 movement = new Vector2();
-    private float speed = 10000;
-    private BodyDef playerBodyDef, wallBodyDef;
-    private FixtureDef playerFixtureDef, wallFixtureDef;
-    private PolygonShape playerShape;
+    private PlayerBody p1;
+
+    private BodyDef wallBodyDef;
+    private FixtureDef wallFixtureDef;
     private ChainShape wallShape;
 
     private final static float TIMESTEP = 1/60f;
@@ -28,21 +26,7 @@ public class GameScreen implements Screen {
         debugRenderer = new Box2DDebugRenderer();
         camera = new OrthographicCamera(WIDTH, HEIGHT); //16:9 aspect ratio
 
-        //player body definitions
-        playerBodyDef = new BodyDef();
-        playerBodyDef.type = BodyDef.BodyType.DynamicBody;
-        playerBodyDef.linearDamping = 2f; //(linear) friction 
-        playerBodyDef.position.set(-40, 1);
-
-        //player shape
-        playerShape = new PolygonShape();
-        playerShape.setAsBox(3, 3);
-
-        //player fixture definitions
-        playerFixtureDef = new FixtureDef();
-        playerFixtureDef.shape = playerShape;
-        playerFixtureDef.density = 1f;
-        playerFixtureDef.restitution = 0.5f;
+        p1 = new PlayerBody();
 
         //wall body definitions
         wallBodyDef = new BodyDef();
@@ -64,10 +48,9 @@ public class GameScreen implements Screen {
         wallFixtureDef.friction = 0;
         wallFixtureDef.restitution = 0;
 
-        playerBody = world.createBody(playerBodyDef);
-        playerBody.createFixture(playerFixtureDef);
+        p1.playerBody = world.createBody(p1.playerBodyDef);
+        p1.playerBody.createFixture(p1.playerFixtureDef);
         world.createBody(wallBodyDef).createFixture(wallFixtureDef);
-        playerShape.dispose();
         wallShape.dispose();
 
 
@@ -76,16 +59,16 @@ public class GameScreen implements Screen {
             public boolean keyDown(int keycode) {
                 switch (keycode) {
                     case Input.Keys.W:
-                        movement.y = speed;
+                        p1.movement.y = p1.speed;
                         break;
                     case Input.Keys.A:
-                        movement.x = -speed;
+                        p1.movement.x = -p1.speed;
                         break;
                     case Input.Keys.S:
-                        movement.y = -speed;
+                        p1.movement.y = -p1.speed;
                         break;
                     case Input.Keys.D:
-                        movement.x = speed;
+                        p1.movement.x = p1.speed;
                         break;
                 }
                 return false;
@@ -96,11 +79,11 @@ public class GameScreen implements Screen {
                 switch (keycode) {
                     case Input.Keys.W:
                     case Input.Keys.S:
-                        movement.y = 0;
+                        p1.movement.y = 0;
                         break;
                     case Input.Keys.A:
                     case Input.Keys.D:
-                        movement.x = 0;
+                        p1.movement.x = 0;
                         break;
                 }
                 return false;
@@ -144,7 +127,7 @@ public class GameScreen implements Screen {
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
         debugRenderer.render(world, camera.combined);
-        playerBody.applyForceToCenter(movement, true);
+        p1.playerBody.applyForceToCenter(p1.movement, true);
         world.step(TIMESTEP, VELOCITYITERATIONS, POSITIONITERATIONS);
 
     }
