@@ -27,5 +27,6 @@ public class PlayerBody {
         playerFixtureDef.shape = playerShape;
         playerFixtureDef.density = 1f;
         playerFixtureDef.restitution = 0.5f;
+
     }
 }

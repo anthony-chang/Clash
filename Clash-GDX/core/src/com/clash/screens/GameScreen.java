@@ -11,10 +11,8 @@ public class GameScreen implements Screen {
     private Box2DDebugRenderer debugRenderer;
     private OrthographicCamera camera;
     private PlayerBody p1;
+    private Walls border;
 
-    private BodyDef wallBodyDef;
-    private FixtureDef wallFixtureDef;
-    private ChainShape wallShape;
 
     private final static float TIMESTEP = 1/60f;
     private final static int VELOCITYITERATIONS = 30, POSITIONITERATIONS = 15;
@@ -27,32 +25,14 @@ public class GameScreen implements Screen {
         camera = new OrthographicCamera(WIDTH, HEIGHT); //16:9 aspect ratio
 
         p1 = new PlayerBody();
-
-        //wall body definitions
-        wallBodyDef = new BodyDef();
-        wallBodyDef.type = BodyDef.BodyType.StaticBody;
-        wallBodyDef.position.set(0, 0);
-
-        //wall shape
-        wallShape = new ChainShape();
-        wallShape.createChain(new Vector2[]{
-                new Vector2(-WIDTH/2, -HEIGHT/2),
-                new Vector2(-WIDTH/2, HEIGHT/2),
-                new Vector2(WIDTH/2, HEIGHT/2),
-                new Vector2(WIDTH/2, -HEIGHT/2),
-                new Vector2(-WIDTH/2, -HEIGHT/2)}); //rectangles have 5 vertices
-
-        //player fixture definitions
-        wallFixtureDef = new FixtureDef();
-        wallFixtureDef.shape = wallShape;
-        wallFixtureDef.friction = 0;
-        wallFixtureDef.restitution = 0;
+        border = new Walls(WIDTH, HEIGHT);
 
         p1.playerBody = world.createBody(p1.playerBodyDef);
         p1.playerBody.createFixture(p1.playerFixtureDef);
-        world.createBody(wallBodyDef).createFixture(wallFixtureDef);
-        wallShape.dispose();
+        world.createBody(border.wallBodyDef).createFixture(border.wallFixtureDef);
 
+        p1.playerShape.dispose();
+        border.wallShape.dispose();
 
         Gdx.input.setInputProcessor(new InputProcessor() {
             @Override
