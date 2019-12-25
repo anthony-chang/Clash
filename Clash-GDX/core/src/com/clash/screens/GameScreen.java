@@ -18,6 +18,8 @@ public class GameScreen implements Screen {
     private final static int VELOCITYITERATIONS = 30, POSITIONITERATIONS = 15;
     private final static int WIDTH = 160, HEIGHT = 90; //metres
 
+    private final boolean accelerometerAvailable = Gdx.input.isPeripheralAvailable(Input.Peripheral.Accelerometer);
+
     @Override
     public void show() {
         world = new World(new Vector2(0, 0), true);
@@ -107,6 +109,10 @@ public class GameScreen implements Screen {
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
         debugRenderer.render(world, camera.combined);
+        if(accelerometerAvailable) { //mobile controls
+            //swap accelerometer x and y since phone is in landscape mode
+            p1.setMovement(Gdx.input.getAccelerometerY()*2000, -Gdx.input.getAccelerometerX()*2000);
+        }
         p1.playerBody.applyForceToCenter(p1.movement, true);
         world.step(TIMESTEP, VELOCITYITERATIONS, POSITIONITERATIONS);
 

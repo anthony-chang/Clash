@@ -31,10 +31,13 @@ public class PlayerBody {
     }
     public void move(int x, int y) {
         if(x != 0)
-            movement.x = (x == -1) ? -speed:speed;
+            movement.x = (x < -1) ? -speed:speed;
         if(y != 0)
-            movement.y = (y== -1) ? -speed:speed;
-
+            movement.y = (y < -1) ? -speed:speed;
+    }
+    public void setMovement(float x, float y) {
+        movement.x = x;
+        movement.y = y;
     }
     public void moveUsingAccelerometer(float accelerometerX, float accelerometerY) {
 
