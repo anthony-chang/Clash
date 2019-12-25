@@ -39,16 +39,16 @@ public class GameScreen implements Screen {
             public boolean keyDown(int keycode) {
                 switch (keycode) {
                     case Input.Keys.W:
-                        p1.movement.y = p1.speed;
+                        p1.move(0, 1);
                         break;
                     case Input.Keys.A:
-                        p1.movement.x = -p1.speed;
+                        p1.move(-1, 0);
                         break;
                     case Input.Keys.S:
-                        p1.movement.y = -p1.speed;
+                        p1.move(0, -1);
                         break;
                     case Input.Keys.D:
-                        p1.movement.x = p1.speed;
+                        p1.move(1, 0);
                         break;
                 }
                 return false;
