@@ -40,6 +40,9 @@ public class PlayerBody {
         movement.y = y;
     }
     public void moveUsingAccelerometer(float accelerometerX, float accelerometerY) {
+        //swap accelerometer x and y since phone is in landscape mode
+        movement.x = accelerometerY*2000;
+        movement.y = -accelerometerX*2000;
 
     }
 }

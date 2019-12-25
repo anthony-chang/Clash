@@ -23,7 +23,7 @@ public class Walls {
                 new Vector2(-screenWidth/2, screenHeight/2),
                 new Vector2(screenWidth/2, screenHeight/2),
                 new Vector2(screenWidth/2, -screenHeight/2),
-                new Vector2(-screenWidth/2, -screenHeight/2)}); //rectangles have 5 vertices
+                new Vector2(-screenWidth/2, -screenHeight/2)}); //rectangles have 5 vertices (connect the dots)
 
         //player fixture definitions
         wallFixtureDef = new FixtureDef();
@@ -31,6 +31,6 @@ public class Walls {
         wallFixtureDef.friction = 0;
         wallFixtureDef.restitution = 0;
 
-        //wallShape.dispose();
+        //wallShape.dispose(); //this dispose call will crash the program
     }
 }

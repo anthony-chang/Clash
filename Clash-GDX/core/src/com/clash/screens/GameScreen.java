@@ -110,8 +110,7 @@ public class GameScreen implements Screen {
 
         debugRenderer.render(world, camera.combined);
         if(accelerometerAvailable) { //mobile controls
-            //swap accelerometer x and y since phone is in landscape mode
-            p1.setMovement(Gdx.input.getAccelerometerY()*2000, -Gdx.input.getAccelerometerX()*2000);
+            p1.moveUsingAccelerometer(Gdx.input.getAccelerometerX(), Gdx.input.getAccelerometerY());
         }
         p1.playerBody.applyForceToCenter(p1.movement, true);
         world.step(TIMESTEP, VELOCITYITERATIONS, POSITIONITERATIONS);
