@@ -11,8 +11,8 @@ public class GameScreen implements Screen {
     private Box2DDebugRenderer debugRenderer;
     private OrthographicCamera camera;
     private PlayerBody p1;
-    private Walls border;
-
+    private Wall border;
+    private Obstacle obstacle1;
 
     private final static float TIMESTEP = 1/60f;
     private final static int VELOCITYITERATIONS = 30, POSITIONITERATIONS = 15;
@@ -23,18 +23,18 @@ public class GameScreen implements Screen {
     @Override
     public void show() {
         world = new World(new Vector2(0, 0), true);
-        debugRenderer = new Box2DDebugRenderer();
+        debugRenderer = new Box2DDebugRenderer(); //TODO remove later
         camera = new OrthographicCamera(WIDTH, HEIGHT); //16:9 aspect ratio
 
         p1 = new PlayerBody();
-        border = new Walls(WIDTH, HEIGHT);
+        border = new Wall(WIDTH, HEIGHT);
+
+        obstacle1 = new Obstacle();
+        world.createBody(obstacle1.obstacleBodyDef).createFixture(obstacle1.obstacleFixtureDef);
 
         p1.playerBody = world.createBody(p1.playerBodyDef);
         p1.playerBody.createFixture(p1.playerFixtureDef);
         world.createBody(border.wallBodyDef).createFixture(border.wallFixtureDef);
-
-        p1.playerShape.dispose();
-        border.wallShape.dispose();
 
         Gdx.input.setInputProcessor(new InputProcessor() {
             @Override
@@ -108,7 +108,8 @@ public class GameScreen implements Screen {
         Gdx.gl.glClearColor(0.1f, 0.1f, 0.1f, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
-        debugRenderer.render(world, camera.combined);
+        debugRenderer.render(world, camera.combined); //TODO remove later
+
         if(accelerometerAvailable) { //mobile controls
             p1.moveUsingAccelerometer(Gdx.input.getAccelerometerX(), Gdx.input.getAccelerometerY());
         }
@@ -139,6 +140,7 @@ public class GameScreen implements Screen {
 
     @Override
     public void dispose() {
-
+        p1.playerShape.dispose();
+        border.wallShape.dispose();
     }
 }

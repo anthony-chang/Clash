@@ -5,12 +5,13 @@ import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.ChainShape;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
 
-public class Walls {
+/*Static wall definitions*/
+public class Wall {
     public BodyDef wallBodyDef;
     public FixtureDef wallFixtureDef;
     public ChainShape wallShape;
 
-    public Walls(int screenWidth, int screenHeight) {
+    public Wall(int screenWidth, int screenHeight) { //border wall constructor
         //wall body definitions
         wallBodyDef = new BodyDef();
         wallBodyDef.type = BodyDef.BodyType.StaticBody;

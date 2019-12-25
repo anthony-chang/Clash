@@ -16,6 +16,7 @@ public class PlayerBody {
         playerBodyDef = new BodyDef();
         playerBodyDef.type = BodyDef.BodyType.DynamicBody;
         playerBodyDef.linearDamping = 2f; //(linear) friction
+        playerBodyDef.fixedRotation = true; //prevent rotating
         playerBodyDef.position.set(-40, 1);
 
         //player shape
@@ -31,9 +32,9 @@ public class PlayerBody {
     }
     public void move(int x, int y) {
         if(x != 0)
-            movement.x = (x < -1) ? -speed:speed;
+            movement.x = (x < 0) ? -speed:speed; //left:right
         if(y != 0)
-            movement.y = (y < -1) ? -speed:speed;
+            movement.y = (y < 0) ? -speed:speed; //down:up
     }
     public void setMovement(float x, float y) {
         movement.x = x;
