@@ -1,5 +1,6 @@
 package com.clash.screens;
 
+import com.badlogic.gdx.Game;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.*;
 
@@ -11,13 +12,16 @@ public class PlayerBody {
     FixtureDef playerFixtureDef;
     PolygonShape playerShape;
 
-    public PlayerBody() {
+    int ammo;
+
+    public PlayerBody(int playerNum) {
+        ammo = 5;
         //player body definitions
         playerBodyDef = new BodyDef();
         playerBodyDef.type = BodyDef.BodyType.DynamicBody;
         playerBodyDef.linearDamping = 2f; //(linear) friction
         playerBodyDef.fixedRotation = true; //prevent rotating
-        playerBodyDef.position.set(-40, 1);
+        playerBodyDef.position.set((playerNum == 1) ? -GameScreen.WIDTH/4:GameScreen.WIDTH*3/4, 0);
 
         //player shape
         playerShape = new PolygonShape();
@@ -28,7 +32,12 @@ public class PlayerBody {
         playerFixtureDef.shape = playerShape;
         playerFixtureDef.density = 1f;
         playerFixtureDef.restitution = 0.5f;
+        playerFixtureDef.filter.categoryBits = (playerNum == 1)? GameScreen.CATEGORY_PLAYER1:GameScreen.CATEGORY_PLAYER2; //PLAYER FILTER INDEX
+        playerFixtureDef.filter.maskBits = GameScreen.CATEGORY_MAP;
 
+    }
+    public Vector2 getPosition() {
+        return playerBody.getPosition();
     }
     public void move(int x, int y) {
         if(x != 0)
@@ -44,6 +53,5 @@ public class PlayerBody {
         //swap accelerometer x and y since phone is in landscape mode
         movement.x = accelerometerY*2000;
         movement.y = -accelerometerX*2000;
-
     }
 }

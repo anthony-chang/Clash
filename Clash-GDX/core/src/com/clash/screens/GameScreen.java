@@ -7,6 +7,18 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.*;
 
 public class GameScreen implements Screen {
+    //Collision filtering categories
+    final static short CATEGORY_PLAYER1 = (short) 1;
+    final static short CATEGORY_PLAYER2 = (short) 2;
+    final static short CATEGORY_BULLET = (short) 4;
+    final static short CATEGORY_MAP = (short) 16;
+
+    private final static float TIMESTEP = 1/60f;
+    private final static int VELOCITYITERATIONS = 30, POSITIONITERATIONS = 15;
+    final static int WIDTH = 160, HEIGHT = 90; //metres
+
+    private final boolean accelerometerAvailable = Gdx.input.isPeripheralAvailable(Input.Peripheral.Accelerometer);
+
     private World world;
     private Box2DDebugRenderer debugRenderer;
     private OrthographicCamera camera;
@@ -14,19 +26,13 @@ public class GameScreen implements Screen {
     private Wall border;
     private Obstacle obstacle1;
 
-    private final static float TIMESTEP = 1/60f;
-    private final static int VELOCITYITERATIONS = 30, POSITIONITERATIONS = 15;
-    private final static int WIDTH = 160, HEIGHT = 90; //metres
-
-    private final boolean accelerometerAvailable = Gdx.input.isPeripheralAvailable(Input.Peripheral.Accelerometer);
-
     @Override
     public void show() {
         world = new World(new Vector2(0, 0), true);
         debugRenderer = new Box2DDebugRenderer(); //TODO remove later
         camera = new OrthographicCamera(WIDTH, HEIGHT); //16:9 aspect ratio
 
-        p1 = new PlayerBody();
+        p1 = new PlayerBody(1);
         border = new Wall(WIDTH, HEIGHT);
 
         obstacle1 = new Obstacle();
@@ -78,6 +84,10 @@ public class GameScreen implements Screen {
 
             @Override
             public boolean touchDown(int screenX, int screenY, int pointer, int button) {
+                float x_metres = ((float)screenX)/((float)Gdx.graphics.getWidth())*WIDTH - WIDTH/2f;
+                float y_metres = HEIGHT/2f - ((float)screenY)/((float)Gdx.graphics.getHeight())*HEIGHT;
+                Bullet bullet = new Bullet(1, p1.getPosition().x, p1.getPosition().y, x_metres, y_metres);
+                world.createBody(bullet.bulletBodyDef).createFixture(bullet.bulletFixtureDef);
                 return false;
             }
 

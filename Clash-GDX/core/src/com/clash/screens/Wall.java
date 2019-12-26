@@ -31,6 +31,11 @@ public class Wall {
         wallFixtureDef.shape = wallShape;
         wallFixtureDef.friction = 0;
         wallFixtureDef.restitution = 0;
+        wallFixtureDef.filter.categoryBits = GameScreen.CATEGORY_MAP;
+        wallFixtureDef.filter.maskBits = GameScreen.CATEGORY_MAP | //collides with other maps objects,
+                GameScreen.CATEGORY_BULLET |                        //bullets,
+                GameScreen.CATEGORY_PLAYER1 |                       //and players
+                GameScreen.CATEGORY_PLAYER2;
 
         //wallShape.dispose(); //this dispose call will crash the program
     }

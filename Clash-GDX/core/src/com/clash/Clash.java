@@ -9,7 +9,6 @@ public class Clash extends Game {
 	@Override
 	public void create () {
 		setScreen(new TitleScreen());
-
 	}
 
 	@Override
@@ -19,6 +18,7 @@ public class Clash extends Game {
 	
 	@Override
 	public void dispose () {
+		this.getScreen().dispose();
 		super.dispose();
 	}
 

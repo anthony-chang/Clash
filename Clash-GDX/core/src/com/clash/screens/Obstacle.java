@@ -1,5 +1,6 @@
 package com.clash.screens;
 
+import com.badlogic.gdx.Game;
 import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
@@ -20,14 +21,19 @@ public class Obstacle {
 
         //obstacle shape
         obstacleShape = new PolygonShape();
-        obstacleShape.setAsBox(1, 6);
+        obstacleShape.setAsBox(1, 10);
 
         //fixture definitions
         obstacleFixtureDef = new FixtureDef();
         obstacleFixtureDef.shape = obstacleShape;
         obstacleFixtureDef.friction = 0;
-        obstacleFixtureDef.density = 0.3f;
+        obstacleFixtureDef.density = 5f;
         obstacleFixtureDef.restitution = 0.2f;
+        obstacleFixtureDef.filter.categoryBits = GameScreen.CATEGORY_MAP;
+        obstacleFixtureDef.filter.maskBits = GameScreen.CATEGORY_MAP |
+                GameScreen.CATEGORY_PLAYER1 |
+                GameScreen.CATEGORY_PLAYER2 |
+                GameScreen.CATEGORY_BULLET;  //collides with wall objects, players, and bullets
 
     }
 }
