@@ -24,7 +24,6 @@ public class GameScreen implements Screen {
     private OrthographicCamera camera;
     private PlayerBody p1;
     private Wall border;
-    private Obstacle obstacle1;
 
     @Override
     public void show() {
@@ -35,8 +34,19 @@ public class GameScreen implements Screen {
         p1 = new PlayerBody(1);
         border = new Wall(WIDTH, HEIGHT);
 
-        obstacle1 = new Obstacle();
+        /**Testing Movable objects**/
+        Obstacle obstacle1 = new Obstacle();
         world.createBody(obstacle1.obstacleBodyDef).createFixture(obstacle1.obstacleFixtureDef);
+
+        /**Testing Immovable wall objects**/ //TODO: implement JSON file to create levels
+        Wall wall1 = new Wall(new Vector2[] {
+                new Vector2(-1, 3),
+                new Vector2(1, 3),
+                new Vector2(1, -3),
+                new Vector2(-1, -3),
+                new Vector2(-1, 3)
+        });
+        world.createBody(wall1.wallBodyDef).createFixture(wall1.wallFixtureDef);
 
         p1.playerBody = world.createBody(p1.playerBodyDef);
         p1.playerBody.createFixture(p1.playerFixtureDef);
