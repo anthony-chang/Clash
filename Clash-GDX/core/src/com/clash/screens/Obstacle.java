@@ -17,7 +17,7 @@ public class Obstacle {
         obstacleBodyDef.type = BodyDef.BodyType.DynamicBody;
         obstacleBodyDef.linearDamping = 2f;
         obstacleBodyDef.angularDamping = 2f;
-        obstacleBodyDef.position.set(0, 0);
+        obstacleBodyDef.position.set(20, 0);
 
         //obstacle shape
         obstacleShape = new PolygonShape();

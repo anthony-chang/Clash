@@ -39,4 +39,23 @@ public class Wall {
 
         //wallShape.dispose(); //this dispose call will crash the program
     }
+    public Wall(Vector2[] vertices) { //normal wall constructor
+        wallBodyDef = new BodyDef();
+        wallBodyDef.type = BodyDef.BodyType.StaticBody;
+        wallBodyDef.position.set(0, 0);
+
+        wallShape = new ChainShape();
+        wallShape.createChain(vertices);
+
+        wallFixtureDef = new FixtureDef();
+        wallFixtureDef.shape = wallShape;
+        wallFixtureDef.friction = 0;
+        wallFixtureDef.restitution = 0;
+        wallFixtureDef.filter.categoryBits = GameScreen.CATEGORY_MAP;
+        wallFixtureDef.filter.maskBits = GameScreen.CATEGORY_MAP | //collides with other maps objects,
+                GameScreen.CATEGORY_BULLET |                        //bullets,
+                GameScreen.CATEGORY_PLAYER1 |                       //and players
+                GameScreen.CATEGORY_PLAYER2;
+
+    }
 }

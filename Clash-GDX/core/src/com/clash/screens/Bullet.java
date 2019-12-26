@@ -17,6 +17,7 @@ public class Bullet {
         bulletBodyDef.type = BodyDef.BodyType.DynamicBody;
         bulletBodyDef.position.set(x, y);
         bulletBodyDef.linearVelocity.set(getVelocityVector(x, y, mouseX, mouseY));
+        bulletBodyDef.fixedRotation = true; //prevent rotation
 
         //shape
         bulletShape = new PolygonShape();

@@ -5,6 +5,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.*;
 
 public class PlayerBody {
+    //Define player properties
     Body playerBody;
     Vector2 movement = new Vector2();
     float speed = 10000;
@@ -12,10 +13,17 @@ public class PlayerBody {
     FixtureDef playerFixtureDef;
     PolygonShape playerShape;
 
+    //ammo and reload system
+    private final int MAX_AMMO = 3;
+    private final float RELOAD_TIME = 1; //1 second to reload
     int ammo;
+    float curTime;
+
+
 
     public PlayerBody(int playerNum) {
-        ammo = 5;
+        ammo = MAX_AMMO;
+        curTime = 0;
         //player body definitions
         playerBodyDef = new BodyDef();
         playerBodyDef.type = BodyDef.BodyType.DynamicBody;
@@ -53,5 +61,14 @@ public class PlayerBody {
         //swap accelerometer x and y since phone is in landscape mode
         movement.x = accelerometerY*2000;
         movement.y = -accelerometerX*2000;
+    }
+    public void updateAmmo(float deltaTime) {
+        if(ammo == MAX_AMMO) //don't do anything at max ammo
+            return;
+        curTime += deltaTime;
+        if(curTime > RELOAD_TIME) {
+            curTime -= RELOAD_TIME;
+            ammo = Math.min(ammo+1, MAX_AMMO); //set cap of ammo
+        }
     }
 }

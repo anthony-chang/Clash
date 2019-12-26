@@ -84,10 +84,13 @@ public class GameScreen implements Screen {
 
             @Override
             public boolean touchDown(int screenX, int screenY, int pointer, int button) {
-                float x_metres = ((float)screenX)/((float)Gdx.graphics.getWidth())*WIDTH - WIDTH/2f;
-                float y_metres = HEIGHT/2f - ((float)screenY)/((float)Gdx.graphics.getHeight())*HEIGHT;
-                Bullet bullet = new Bullet(1, p1.getPosition().x, p1.getPosition().y, x_metres, y_metres);
-                world.createBody(bullet.bulletBodyDef).createFixture(bullet.bulletFixtureDef);
+                if(p1.ammo > 0) {
+                    --p1.ammo;
+                    float x_metres = ((float) screenX) / ((float) Gdx.graphics.getWidth()) * WIDTH - WIDTH / 2f;
+                    float y_metres = HEIGHT / 2f - ((float) screenY) / ((float) Gdx.graphics.getHeight()) * HEIGHT;
+                    Bullet bullet = new Bullet(1, p1.getPosition().x, p1.getPosition().y, x_metres, y_metres);
+                    world.createBody(bullet.bulletBodyDef).createFixture(bullet.bulletFixtureDef);
+                }
                 return false;
             }
 
@@ -119,6 +122,8 @@ public class GameScreen implements Screen {
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
         debugRenderer.render(world, camera.combined); //TODO remove later
+
+        p1.updateAmmo(Gdx.graphics.getRawDeltaTime());
 
         if(accelerometerAvailable) { //mobile controls
             p1.moveUsingAccelerometer(Gdx.input.getAccelerometerX(), Gdx.input.getAccelerometerY());
