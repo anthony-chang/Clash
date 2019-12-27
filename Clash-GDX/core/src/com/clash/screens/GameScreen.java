@@ -96,6 +96,7 @@ public class GameScreen implements Screen {
             public boolean touchDown(int screenX, int screenY, int pointer, int button) {
                 if(p1.ammo > 0) {
                     --p1.ammo;
+                    //convert mouse (x, y) in pixels to (x, y) in metres
                     float x_metres = ((float) screenX) / ((float) Gdx.graphics.getWidth()) * WIDTH - WIDTH / 2f;
                     float y_metres = HEIGHT / 2f - ((float) screenY) / ((float) Gdx.graphics.getHeight()) * HEIGHT;
                     Bullet bullet = new Bullet(1, p1.getPosition().x, p1.getPosition().y, x_metres, y_metres);
@@ -131,8 +132,6 @@ public class GameScreen implements Screen {
         Gdx.gl.glClearColor(0.1f, 0.1f, 0.1f, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
-        debugRenderer.render(world, camera.combined); //TODO remove later
-
         p1.updateAmmo(Gdx.graphics.getRawDeltaTime());
 
         if(accelerometerAvailable) { //mobile controls
@@ -141,6 +140,10 @@ public class GameScreen implements Screen {
         p1.playerBody.applyForceToCenter(p1.movement, true);
         world.step(TIMESTEP, VELOCITYITERATIONS, POSITIONITERATIONS);
 
+        camera.position.set(p1.getPosition().x, p1.getPosition().y, 0);
+        camera.update();
+
+        debugRenderer.render(world, camera.combined); //TODO remove later
     }
 
     @Override

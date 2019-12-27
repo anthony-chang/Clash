@@ -16,7 +16,10 @@ public class Bullet {
         bulletBodyDef = new BodyDef();
         bulletBodyDef.type = BodyDef.BodyType.DynamicBody;
         bulletBodyDef.position.set(x, y);
+        /*Use this declaration if camera is not centred about the player
         bulletBodyDef.linearVelocity.set(getVelocityVector(x, y, mouseX, mouseY));
+         */
+        bulletBodyDef.linearVelocity.set(getVelocityVector(0, 0, mouseX, mouseY));
         bulletBodyDef.fixedRotation = true; //prevent rotation
 
         //shape
