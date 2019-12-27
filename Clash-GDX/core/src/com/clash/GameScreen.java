@@ -4,7 +4,6 @@ import com.badlogic.gdx.*;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Quaternion;
@@ -25,7 +24,7 @@ public class GameScreen implements Screen {
     final static int WIDTH = 160, HEIGHT = 90; //metres
 
     private final boolean accelerometerAvailable = Gdx.input.isPeripheralAvailable(Input.Peripheral.Accelerometer);
-    private Vector3 tiltCalibration;
+    private Vector3 initialAccelerometerState;
     Matrix4 calibrationMatrix;
 
     private World world;
@@ -39,7 +38,7 @@ public class GameScreen implements Screen {
 
     @Override
     public void show() {
-        //set up world and camera
+        /**set up world and camera**/
         world = new World(new Vector2(0, 0), true);
         world.setContactListener(new CollisionDetection());
         debugRenderer = new Box2DDebugRenderer(); //TODO remove later
@@ -48,23 +47,22 @@ public class GameScreen implements Screen {
         /**set up accelerometer calibration**/
         //takes in accelerometer data when play button is pressed, and sets that as the "zero" position
         //apply a rotation matrix for inputs all inputs afterwards
-        tiltCalibration = new Vector3(Gdx.input.getAccelerometerX(), 0, Gdx.input.getAccelerometerZ());
+        initialAccelerometerState = new Vector3(Gdx.input.getAccelerometerX(), 0, Gdx.input.getAccelerometerZ());
         Vector3 temp = new Vector3(0, 0, 1);
-        Vector3 temp2 = new Vector3(tiltCalibration).nor();
-        Quaternion rotateQuaternion = new Quaternion().setFromCross(temp, temp2);
+        Vector3 temp2 = new Vector3(initialAccelerometerState).nor(); //normalize vector
+        Quaternion rotateQuaternion = new Quaternion().setFromCross(temp, temp2); //bruh moment
         Matrix4 mat = new Matrix4(Vector3.Zero, rotateQuaternion, new Vector3(1f, 1f, 1f));
-        calibrationMatrix = mat.inv();
+        calibrationMatrix = mat.inv(); //invert the matrix so it can be applied later
 
-
-        //set up the objects in the world
+        /**Set up the objects in the world**/
         p1 = new PlayerBody(1);
         border = new Wall(WIDTH, HEIGHT);
 
-        /**Testing Movable objects**/
+        //Testing Movable objects
         Obstacle obstacle1 = new Obstacle();
         obstacle1.addObstacleToWorld(world);
 
-        /**Testing Immovable wall objects**/ //TODO: implement JSON file to create levels
+        //Testing Immovable wall objects //TODO: implement JSON file to create levels
         Wall wall1 = new Wall(new Vector2[] {
                 new Vector2(-1, 3),
                 new Vector2(1, 3),
@@ -77,7 +75,7 @@ public class GameScreen implements Screen {
         p1.addPlayerToWorld(world);
         border.addWallWorld(world);
 
-        //inline input processor functions
+        /**inline input processor functions**/
         Gdx.input.setInputProcessor(new InputProcessor() {
             @Override
             public boolean keyDown(int keycode) {
@@ -155,7 +153,7 @@ public class GameScreen implements Screen {
 
     @Override
     public void render(float delta) {
-        //set background colour
+        /**set background colour**/
         Gdx.gl.glClearColor(0.1f, 0.1f, 0.1f, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
@@ -173,6 +171,7 @@ public class GameScreen implements Screen {
                     bulletHeight);
         hud.end();
 
+        /**Update player characteristics**/
         deleteBullets(); //clear the screen of bullets that have collided with things
 
         p1.updateAmmo(Gdx.graphics.getRawDeltaTime()); //update the ammo of the player
@@ -184,7 +183,7 @@ public class GameScreen implements Screen {
         p1.playerBody.applyForceToCenter(p1.movement, true); //move the player
         world.step(TIMESTEP, VELOCITYITERATIONS, POSITIONITERATIONS); //simulate the physics
 
-        /*Remove if camera not centred about player*/
+        /**Centre camera about player**/
         camera.position.set(p1.getPosition().x, p1.getPosition().y, 0);
         camera.update();
 
