@@ -9,15 +9,17 @@ public class Bullet{
     FixtureDef bulletFixtureDef;
     PolygonShape bulletShape;
 
-    public Bullet(int playerNum, float x, float y, float mouseX, float mouseY) {
+    public Bullet(int playerNum, float x, float y, float mouseX, float mouseY, boolean autoAim) {
         //body definitions
         bulletBodyDef = new BodyDef();
         bulletBodyDef.type = BodyDef.BodyType.DynamicBody;
         bulletBodyDef.position.set(x, y);
-        /*Use this declaration if camera is not centred about the player
-        bulletBodyDef.linearVelocity.set(getVelocityVector(x, y, mouseX, mouseY));
-         */
-        bulletBodyDef.linearVelocity.set(getVelocityVector(0, 0, mouseX, mouseY));
+        if(autoAim) {
+            bulletBodyDef.linearVelocity.set(getVelocityVector(x, y, mouseX, mouseY));
+        }
+        else {
+            bulletBodyDef.linearVelocity.set(getVelocityVector(0, 0, mouseX, mouseY));
+        }
         bulletBodyDef.fixedRotation = true; //prevent rotation
 
         //shape
@@ -30,7 +32,14 @@ public class Bullet{
         bulletFixtureDef.density = 1f;
         bulletFixtureDef.restitution = 0;
         bulletFixtureDef.filter.categoryBits = GameScreen.CATEGORY_BULLET;
-        bulletFixtureDef.filter.maskBits = GameScreen.CATEGORY_MAP | GameScreen.CATEGORY_BULLET; //collides with map objects and other bullets
+        if(playerNum == 1) {
+            //collides with map objects, other bullets, and player2
+            bulletFixtureDef.filter.maskBits = GameScreen.CATEGORY_MAP | GameScreen.CATEGORY_BULLET | GameScreen.CATEGORY_PLAYER2;
+        }
+        else if(playerNum == 2) {
+            //collides with map objects, other bullets, and player1
+            bulletFixtureDef.filter.maskBits = GameScreen.CATEGORY_MAP | GameScreen.CATEGORY_BULLET | GameScreen.CATEGORY_PLAYER1;
+        }
     }
     public void addBulletToWorld(World world) {
         bulletBody = world.createBody(bulletBodyDef);

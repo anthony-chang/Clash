@@ -5,6 +5,7 @@ import com.badlogic.gdx.physics.box2d.*;
 
 public class PlayerBody {
     //Define player properties
+    private int num;
     Body playerBody;
     Vector2 movement = new Vector2();
     float speed = 8000;
@@ -19,6 +20,7 @@ public class PlayerBody {
     float curTime;
 
     public PlayerBody(int playerNum) {
+        num = playerNum;
         ammo = MAX_AMMO;
         curTime = 0;
         //player body definitions
@@ -26,7 +28,7 @@ public class PlayerBody {
         playerBodyDef.type = BodyDef.BodyType.DynamicBody;
         playerBodyDef.linearDamping = 2f; //(linear) friction
         playerBodyDef.fixedRotation = true; //prevent rotating
-        playerBodyDef.position.set((playerNum == 1) ? -GameScreen.WIDTH/4:GameScreen.WIDTH*3/4, 0);
+        playerBodyDef.position.set((playerNum == 1) ? -GameScreen.WIDTH/4:GameScreen.WIDTH/4, 0);
 
         //player shape
         playerShape = new PolygonShape();
@@ -38,11 +40,11 @@ public class PlayerBody {
         playerFixtureDef.density = 1f;
         playerFixtureDef.restitution = 0.5f;
         playerFixtureDef.filter.categoryBits = (playerNum == 1)? GameScreen.CATEGORY_PLAYER1:GameScreen.CATEGORY_PLAYER2; //PLAYER FILTER INDEX
-        playerFixtureDef.filter.maskBits = GameScreen.CATEGORY_MAP;
+        playerFixtureDef.filter.maskBits = GameScreen.CATEGORY_MAP | GameScreen.CATEGORY_BULLET;
     }
     public void addPlayerToWorld(World world) {
         playerBody = world.createBody(playerBodyDef);
-        playerBody.setUserData("PLAYER");
+        playerBody.setUserData((num == 1) ? "PLAYER1":"PLAYER2");
         playerBody.createFixture(playerFixtureDef);
     }
     public Vector2 getPosition() {

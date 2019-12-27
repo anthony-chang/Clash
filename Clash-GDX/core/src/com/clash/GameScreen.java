@@ -13,26 +13,33 @@ import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.utils.Array;
 
 public class GameScreen implements Screen {
-    //Collision filtering categories
+    /**Settings stuff**/
+    static boolean AUTO_AIM = false;
+
+    /**Collision filtering categories**/
     final static short CATEGORY_PLAYER1 = (short) 1;
     final static short CATEGORY_PLAYER2 = (short) 2;
     final static short CATEGORY_BULLET = (short) 4;
     final static short CATEGORY_MAP = (short) 16;
 
+    /**Simulation properties and screen size**/
     private final static float TIMESTEP = 1/60f;
     private final static int VELOCITYITERATIONS = 30, POSITIONITERATIONS = 15;
     final static int WIDTH = 160, HEIGHT = 90; //metres
 
+    /**Accelerometer stuff**/
     private final boolean accelerometerAvailable = Gdx.input.isPeripheralAvailable(Input.Peripheral.Accelerometer);
     private Vector3 initialAccelerometerState;
     Matrix4 calibrationMatrix;
 
+    /**Game objects**/
     private World world;
     private Box2DDebugRenderer debugRenderer;
     private OrthographicCamera camera;
-    private PlayerBody p1;
+    private PlayerBody p1, p2;
     private Wall border;
 
+    /**HUD objects**/
     private SpriteBatch hud = new SpriteBatch();
     private Texture bulletTexture = new Texture("bullet.png");
 
@@ -47,16 +54,22 @@ public class GameScreen implements Screen {
         /**set up accelerometer calibration**/
         //takes in accelerometer data when play button is pressed, and sets that as the "zero" position
         //apply a rotation matrix for inputs all inputs afterwards
-        initialAccelerometerState = new Vector3(Gdx.input.getAccelerometerX(), Gdx.input.getAccelerometerY(), Gdx.input.getAccelerometerZ());
-        Vector3 temp = new Vector3(0, 0, 1);
-        Vector3 temp2 = new Vector3(initialAccelerometerState).nor(); //normalize vector
-        Quaternion rotateQuaternion = new Quaternion().setFromCross(temp, temp2); //bruh moment
-        Matrix4 mat = new Matrix4(Vector3.Zero, rotateQuaternion, new Vector3(1f, 1f, 1f));
-        calibrationMatrix = mat.inv(); //invert the matrix so it can be applied later
+        if(accelerometerAvailable) {
+            initialAccelerometerState = new Vector3(Gdx.input.getAccelerometerX(), Gdx.input.getAccelerometerY(), Gdx.input.getAccelerometerZ());
+            Vector3 temp = new Vector3(0, 0, 1);
+            Vector3 temp2 = new Vector3(initialAccelerometerState).nor(); //normalize vector
+            Quaternion rotateQuaternion = new Quaternion().setFromCross(temp, temp2); //bruh moment
+            Matrix4 mat = new Matrix4(Vector3.Zero, rotateQuaternion, new Vector3(1f, 1f, 1f));
+            calibrationMatrix = mat.inv(); //invert the matrix so it can be applied later
+        }
 
         /**Set up the objects in the world**/
         p1 = new PlayerBody(1);
+        p1.addPlayerToWorld(world);
+        p2 = new PlayerBody(2);
+        p2.addPlayerToWorld(world);
         border = new Wall(WIDTH, HEIGHT);
+        border.addWallWorld(world);
 
         //Testing Movable objects
         Obstacle obstacle1 = new Obstacle();
@@ -72,8 +85,6 @@ public class GameScreen implements Screen {
         });
         wall1.addWallWorld(world);
 
-        p1.addPlayerToWorld(world);
-        border.addWallWorld(world);
 
         /**inline input processor functions**/
         Gdx.input.setInputProcessor(new InputProcessor() {
@@ -120,12 +131,23 @@ public class GameScreen implements Screen {
             public boolean touchDown(int screenX, int screenY, int pointer, int button) {
                 if(p1.ammo > 0) {
                     --p1.ammo;
-                    //convert mouse (x, y) in pixels (with origin at top left) to (x, y) in metres (with origin at centre)
-                    float x_metres = ((float) screenX) / ((float) Gdx.graphics.getWidth()) * WIDTH - WIDTH / 2f;
-                    float y_metres = HEIGHT / 2f - ((float) screenY) / ((float) Gdx.graphics.getHeight()) * HEIGHT;
-                    Bullet bullet = new Bullet(1, p1.getPosition().x, p1.getPosition().y, x_metres, y_metres);
+                    Bullet bullet;
+                    if(AUTO_AIM) {
+                        bullet = new Bullet(1, p1.getPosition().x, p1.getPosition().y, p2.getPosition().x, p2.getPosition().y, AUTO_AIM);
+                    }
+                    else {
+                        //convert mouse (x, y) in pixels (with origin at top left) to (x, y) in metres (with origin at centre)
+                        float x_metres = ((float) screenX) / ((float) Gdx.graphics.getWidth()) * WIDTH - WIDTH / 2f;
+                        float y_metres = HEIGHT / 2f - ((float) screenY) / ((float) Gdx.graphics.getHeight()) * HEIGHT;
+                        bullet = new Bullet(1, p1.getPosition().x, p1.getPosition().y, x_metres, y_metres, AUTO_AIM);
+                    }
                     bullet.addBulletToWorld(world);
                 }
+                /**Testing Player 2 bullets**/
+                //p2 just fires when p1 fires
+                //auto aim at player 1
+                Bullet bullet2 = new Bullet(2, p2.getPosition().x, p2.getPosition().y, p1.getPosition().x, p1.getPosition().y, true);
+                bullet2.addBulletToWorld(world);
                 return false;
             }
 

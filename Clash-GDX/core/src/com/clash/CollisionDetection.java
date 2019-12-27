@@ -13,9 +13,21 @@ public class CollisionDetection implements ContactListener {
 
         if(objectA.equals("BULLET")) {
             contact.getFixtureA().getBody().setUserData("DELETE");
+            if(objectB.equals("PLAYER1")) {
+                System.out.println("Player 1 hit");
+            }
+            else if (objectB.equals("PLAYER2")) {
+                System.out.println("Player 2 hit");
+            }
         }
         if(objectB.equals("BULLET")) {
             contact.getFixtureB().getBody().setUserData("DELETE");
+            if(objectA.equals("PLAYER1")) {
+                System.out.println("Player 1 hit");
+            }
+            else if (objectA.equals("PLAYER2")) {
+                System.out.println("Player 2 hit");
+            }
         }
     }
 
