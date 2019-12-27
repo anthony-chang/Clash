@@ -1,12 +1,10 @@
-package com.clash.screens;
+package com.clash;
 
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.physics.box2d.Body;
-import com.badlogic.gdx.physics.box2d.BodyDef;
-import com.badlogic.gdx.physics.box2d.FixtureDef;
-import com.badlogic.gdx.physics.box2d.PolygonShape;
+import com.badlogic.gdx.physics.box2d.*;
 
-public class Bullet {
+public class Bullet{
+    Body bulletBody;
     BodyDef bulletBodyDef;
     FixtureDef bulletFixtureDef;
     PolygonShape bulletShape;
@@ -33,10 +31,16 @@ public class Bullet {
         bulletFixtureDef.restitution = 0;
         bulletFixtureDef.filter.categoryBits = GameScreen.CATEGORY_BULLET;
         bulletFixtureDef.filter.maskBits = GameScreen.CATEGORY_MAP | GameScreen.CATEGORY_BULLET; //collides with map objects and other bullets
-
     }
+    public void addBulletToWorld(World world) {
+        bulletBody = world.createBody(bulletBodyDef);
+        bulletBody.setUserData("BULLET");
+        bulletBody.createFixture(bulletFixtureDef);
+    }
+
     private Vector2 getVelocityVector(float startX, float startY, float destX, float destY) {
         float magnitude = (float) Math.sqrt(((destX-startX)*(destX-startX))+((destY-startY)*(destY-startY)));
         return new Vector2((destX-startX)/magnitude*500, (destY-startY)/magnitude*500);
     }
+
 }

@@ -1,12 +1,11 @@
-package com.clash.screens;
+package com.clash;
 
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.physics.box2d.BodyDef;
-import com.badlogic.gdx.physics.box2d.ChainShape;
-import com.badlogic.gdx.physics.box2d.FixtureDef;
+import com.badlogic.gdx.physics.box2d.*;
 
 /*Static wall definitions*/
 public class Wall {
+    public Body wallBody;
     public BodyDef wallBodyDef;
     public FixtureDef wallFixtureDef;
     public ChainShape wallShape;
@@ -57,5 +56,10 @@ public class Wall {
                 GameScreen.CATEGORY_PLAYER1 |                       //and players
                 GameScreen.CATEGORY_PLAYER2;
 
+    }
+    public void addWallWorld(World world) {
+        wallBody = world.createBody(wallBodyDef);
+        wallBody.setUserData("WALL");
+        wallBody.createFixture(wallFixtureDef);
     }
 }

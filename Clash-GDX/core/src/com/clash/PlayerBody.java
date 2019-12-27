@@ -1,6 +1,5 @@
-package com.clash.screens;
+package com.clash;
 
-import com.badlogic.gdx.Game;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.*;
 
@@ -18,8 +17,6 @@ public class PlayerBody {
     private final float RELOAD_TIME = 1; //1 second to reload
     int ammo;
     float curTime;
-
-
 
     public PlayerBody(int playerNum) {
         ammo = MAX_AMMO;
@@ -42,7 +39,11 @@ public class PlayerBody {
         playerFixtureDef.restitution = 0.5f;
         playerFixtureDef.filter.categoryBits = (playerNum == 1)? GameScreen.CATEGORY_PLAYER1:GameScreen.CATEGORY_PLAYER2; //PLAYER FILTER INDEX
         playerFixtureDef.filter.maskBits = GameScreen.CATEGORY_MAP;
-
+    }
+    public void addPlayerToWorld(World world) {
+        playerBody = world.createBody(playerBodyDef);
+        playerBody.setUserData("PLAYER");
+        playerBody.createFixture(playerFixtureDef);
     }
     public Vector2 getPosition() {
         return playerBody.getPosition();

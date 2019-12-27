@@ -1,12 +1,10 @@
-package com.clash.screens;
+package com.clash;
 
-import com.badlogic.gdx.Game;
-import com.badlogic.gdx.physics.box2d.BodyDef;
-import com.badlogic.gdx.physics.box2d.FixtureDef;
-import com.badlogic.gdx.physics.box2d.PolygonShape;
+import com.badlogic.gdx.physics.box2d.*;
 
 /*Dynamic obstacle definitions*/
 public class Obstacle {
+    Body obstacleBody;
     BodyDef obstacleBodyDef;
     FixtureDef obstacleFixtureDef;
     PolygonShape obstacleShape;
@@ -35,5 +33,10 @@ public class Obstacle {
                 GameScreen.CATEGORY_PLAYER2 |
                 GameScreen.CATEGORY_BULLET;  //collides with wall objects, players, and bullets
 
+    }
+    public void addObstacleToWorld(World world) {
+        obstacleBody = world.createBody(obstacleBodyDef);
+        obstacleBody.setUserData("OBSTACLE");
+        obstacleBody.createFixture(obstacleFixtureDef);
     }
 }

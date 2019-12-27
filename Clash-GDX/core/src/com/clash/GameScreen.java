@@ -1,10 +1,11 @@
-package com.clash.screens;
+package com.clash;
 
 import com.badlogic.gdx.*;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.*;
+import com.badlogic.gdx.utils.Array;
 
 public class GameScreen implements Screen {
     //Collision filtering categories
@@ -28,6 +29,7 @@ public class GameScreen implements Screen {
     @Override
     public void show() {
         world = new World(new Vector2(0, 0), true);
+        world.setContactListener(new CollisionDetection());
         debugRenderer = new Box2DDebugRenderer(); //TODO remove later
         camera = new OrthographicCamera(WIDTH, HEIGHT); //16:9 aspect ratio
 
@@ -36,7 +38,7 @@ public class GameScreen implements Screen {
 
         /**Testing Movable objects**/
         Obstacle obstacle1 = new Obstacle();
-        world.createBody(obstacle1.obstacleBodyDef).createFixture(obstacle1.obstacleFixtureDef);
+        obstacle1.addObstacleToWorld(world);
 
         /**Testing Immovable wall objects**/ //TODO: implement JSON file to create levels
         Wall wall1 = new Wall(new Vector2[] {
@@ -46,11 +48,10 @@ public class GameScreen implements Screen {
                 new Vector2(-1, -3),
                 new Vector2(-1, 3)
         });
-        world.createBody(wall1.wallBodyDef).createFixture(wall1.wallFixtureDef);
+        wall1.addWallWorld(world);
 
-        p1.playerBody = world.createBody(p1.playerBodyDef);
-        p1.playerBody.createFixture(p1.playerFixtureDef);
-        world.createBody(border.wallBodyDef).createFixture(border.wallFixtureDef);
+        p1.addPlayerToWorld(world);
+        border.addWallWorld(world);
 
         Gdx.input.setInputProcessor(new InputProcessor() {
             @Override
@@ -96,11 +97,11 @@ public class GameScreen implements Screen {
             public boolean touchDown(int screenX, int screenY, int pointer, int button) {
                 if(p1.ammo > 0) {
                     --p1.ammo;
-                    //convert mouse (x, y) in pixels to (x, y) in metres
+                    //convert mouse (x, y) in pixels (with origin at top left) to (x, y) in metres (with origin at centre)
                     float x_metres = ((float) screenX) / ((float) Gdx.graphics.getWidth()) * WIDTH - WIDTH / 2f;
                     float y_metres = HEIGHT / 2f - ((float) screenY) / ((float) Gdx.graphics.getHeight()) * HEIGHT;
                     Bullet bullet = new Bullet(1, p1.getPosition().x, p1.getPosition().y, x_metres, y_metres);
-                    world.createBody(bullet.bulletBodyDef).createFixture(bullet.bulletFixtureDef);
+                    bullet.addBulletToWorld(world);
                 }
                 return false;
             }
@@ -132,6 +133,8 @@ public class GameScreen implements Screen {
         Gdx.gl.glClearColor(0.1f, 0.1f, 0.1f, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
+        deleteBullets();
+
         p1.updateAmmo(Gdx.graphics.getRawDeltaTime());
 
         if(accelerometerAvailable) { //mobile controls
@@ -140,10 +143,22 @@ public class GameScreen implements Screen {
         p1.playerBody.applyForceToCenter(p1.movement, true);
         world.step(TIMESTEP, VELOCITYITERATIONS, POSITIONITERATIONS);
 
+        /*Remove if camera not centred about player*/
         camera.position.set(p1.getPosition().x, p1.getPosition().y, 0);
         camera.update();
 
         debugRenderer.render(world, camera.combined); //TODO remove later
+    }
+    private void deleteBullets() {
+        if(world.getBodyCount() > 0) {
+            Array<Body> bodies = new Array<Body>();
+            world.getBodies(bodies);
+            for (int i = 0; i < bodies.size; ++i) {
+                if (bodies.get(i).getUserData().equals("DELETE")) {
+                    world.destroyBody(bodies.get(i));
+                }
+            }
+        }
     }
 
     @Override

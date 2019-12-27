@@ -1,7 +1,6 @@
 package com.clash;
 
 import com.badlogic.gdx.Game;
-import com.clash.screens.TitleScreen;
 
 public class Clash extends Game {
 	public static final String TITLE = "Clash", VERSION = "0.00";
