@@ -25,7 +25,7 @@ public class Obstacle {
         obstacleFixtureDef = new FixtureDef();
         obstacleFixtureDef.shape = obstacleShape;
         obstacleFixtureDef.friction = 0;
-        obstacleFixtureDef.density = 5f;
+        obstacleFixtureDef.density = 3f;
         obstacleFixtureDef.restitution = 0.2f;
         obstacleFixtureDef.filter.categoryBits = GameScreen.CATEGORY_MAP;
         obstacleFixtureDef.filter.maskBits = GameScreen.CATEGORY_MAP |

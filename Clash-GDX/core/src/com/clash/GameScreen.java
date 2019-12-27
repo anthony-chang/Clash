@@ -3,6 +3,9 @@ package com.clash;
 import com.badlogic.gdx.*;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.Sprite;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.utils.Array;
@@ -25,6 +28,9 @@ public class GameScreen implements Screen {
     private OrthographicCamera camera;
     private PlayerBody p1;
     private Wall border;
+
+    private SpriteBatch hud = new SpriteBatch();
+    private Texture bulletTexture = new Texture("bullet.png");
 
     @Override
     public void show() {
@@ -132,6 +138,12 @@ public class GameScreen implements Screen {
     public void render(float delta) {
         Gdx.gl.glClearColor(0.1f, 0.1f, 0.1f, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+
+        hud.begin();
+        for(int i = 0; i < p1.ammo; ++i) {
+            hud.draw(bulletTexture, (int) (Gdx.graphics.getWidth() - (bulletTexture.getWidth() * 1.05)), i * bulletTexture.getHeight());
+        }
+        hud.end();
 
         deleteBullets();
 

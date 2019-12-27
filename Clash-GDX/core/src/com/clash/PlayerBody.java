@@ -7,7 +7,7 @@ public class PlayerBody {
     //Define player properties
     Body playerBody;
     Vector2 movement = new Vector2();
-    float speed = 10000;
+    float speed = 8000;
     BodyDef playerBodyDef;
     FixtureDef playerFixtureDef;
     PolygonShape playerShape;
