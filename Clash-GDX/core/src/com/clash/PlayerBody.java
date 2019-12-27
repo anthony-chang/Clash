@@ -13,7 +13,7 @@ public class PlayerBody {
     PolygonShape playerShape;
 
     //ammo and reload system
-    private final int MAX_AMMO = 3;
+    final int MAX_AMMO = 3;
     private final float RELOAD_TIME = 1; //1 second to reload
     int ammo;
     float curTime;
@@ -71,5 +71,10 @@ public class PlayerBody {
             curTime -= RELOAD_TIME;
             ammo = Math.min(ammo+1, MAX_AMMO); //set cap of ammo
         }
+    }
+    public float getReloadPercentage() {
+        if(ammo == MAX_AMMO)
+            return 1;
+        return curTime/RELOAD_TIME;
     }
 }

@@ -140,9 +140,16 @@ public class GameScreen implements Screen {
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
         hud.begin();
+        int bulletWidth = bulletTexture.getWidth(), bulletHeight = bulletTexture.getHeight();
         for(int i = 0; i < p1.ammo; ++i) {
-            hud.draw(bulletTexture, (int) (Gdx.graphics.getWidth() - (bulletTexture.getWidth() * 1.05)), i * bulletTexture.getHeight());
+            hud.draw(bulletTexture, (int) (Gdx.graphics.getWidth() - (bulletWidth * 1.05)), i * bulletHeight);
         }
+        if(p1.ammo < p1.MAX_AMMO)
+            hud.draw(bulletTexture, (int) (Gdx.graphics.getWidth() - (bulletWidth * 1.05)), p1.ammo * bulletHeight,
+                    0,
+                    0,
+                    (int) (bulletWidth*p1.getReloadPercentage()),
+                    bulletHeight);
         hud.end();
 
         deleteBullets();
