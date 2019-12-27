@@ -47,7 +47,7 @@ public class GameScreen implements Screen {
         /**set up accelerometer calibration**/
         //takes in accelerometer data when play button is pressed, and sets that as the "zero" position
         //apply a rotation matrix for inputs all inputs afterwards
-        initialAccelerometerState = new Vector3(Gdx.input.getAccelerometerX(), 0, Gdx.input.getAccelerometerZ());
+        initialAccelerometerState = new Vector3(Gdx.input.getAccelerometerX(), Gdx.input.getAccelerometerY(), Gdx.input.getAccelerometerZ());
         Vector3 temp = new Vector3(0, 0, 1);
         Vector3 temp2 = new Vector3(initialAccelerometerState).nor(); //normalize vector
         Quaternion rotateQuaternion = new Quaternion().setFromCross(temp, temp2); //bruh moment
