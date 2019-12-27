@@ -13,7 +13,7 @@ public class PlayerBody {
     PolygonShape playerShape;
 
     //ammo and reload system
-    final int MAX_AMMO = 3;
+    final int MAX_AMMO = 5;
     private final float RELOAD_TIME = 1; //1 second to reload
     int ammo;
     float curTime;
