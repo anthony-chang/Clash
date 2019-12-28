@@ -9,17 +9,17 @@ public class Obstacle {
     FixtureDef obstacleFixtureDef;
     PolygonShape obstacleShape;
 
-    public Obstacle() {
+    public Obstacle(int x, int y, int width, int height) {
         //obstacle body definitions
         obstacleBodyDef = new BodyDef();
         obstacleBodyDef.type = BodyDef.BodyType.DynamicBody;
         obstacleBodyDef.linearDamping = 2f;
         obstacleBodyDef.angularDamping = 2f;
-        obstacleBodyDef.position.set(20, 0);
+        obstacleBodyDef.position.set(x, y);
 
         //obstacle shape
         obstacleShape = new PolygonShape();
-        obstacleShape.setAsBox(1, 10);
+        obstacleShape.setAsBox(width, height);
 
         //fixture definitions
         obstacleFixtureDef = new FixtureDef();

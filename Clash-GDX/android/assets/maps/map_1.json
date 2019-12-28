@@ -1,0 +1,42 @@
+{
+  "Walls" : [
+    {
+      "x": 0,
+      "y": 0,
+      "width" : 2,
+      "height": 6
+    },
+    {
+      "x": 0,
+      "y": 15,
+      "width" : 2,
+      "height": 6
+    },
+    {
+      "x": 0,
+      "y": 30,
+      "width" : 2,
+      "height": 6
+    },
+    {
+      "x": 0,
+      "y": -15,
+      "width" : 2,
+      "height": 6
+    },
+    {
+      "x": 0,
+      "y": -30,
+      "width" : 2,
+      "height": 6
+    }
+  ],
+  "Obstacles" : [
+    {
+      "x": 20,
+      "y": 0,
+      "width": 2,
+      "height": 10
+    }
+  ]
+}

@@ -16,7 +16,8 @@ import com.badlogic.gdx.utils.viewport.Viewport;
 
 public class GameScreen implements Screen {
     /**Settings stuff**/
-    static boolean AUTO_AIM = false;
+    static boolean AUTO_AIM = false; //set to true for bullets to target opponent automatically
+                                    //set to false for bullets to target mouse location
 
     /**Collision filtering categories**/
     final static short CATEGORY_PLAYER1 = (short) 1;
@@ -43,6 +44,7 @@ public class GameScreen implements Screen {
     private Viewport viewPort;
     private PlayerBody p1, p2;
     private Wall border;
+    private MapGenerator map;
 
     /**Player Objects**/
     private SpriteBatch players = new SpriteBatch();
@@ -83,19 +85,14 @@ public class GameScreen implements Screen {
         border = new Wall(WIDTH, HEIGHT);
         border.addWallWorld(world);
 
-        //Testing Movable objects
-        Obstacle obstacle1 = new Obstacle();
-        obstacle1.addObstacleToWorld(world);
-
-        //Testing Immovable wall objects //TODO: implement JSON file to create levels
-        Wall wall1 = new Wall(new Vector2[] {
-                new Vector2(-1, 3),
-                new Vector2(1, 3),
-                new Vector2(1, -3),
-                new Vector2(-1, -3),
-                new Vector2(-1, 3)
-        });
-        wall1.addWallWorld(world);
+        //create the map using the JSON files
+        map = new MapGenerator("maps/map_1.json");
+        for(Wall i : map.walls) {
+            i.addWallWorld(world);
+        }
+        for(Obstacle i : map.obstacles) {
+            i.addObstacleToWorld(world);
+        }
 
         /**inline input processor functions**/
         Gdx.input.setInputProcessor(new InputProcessor() {
@@ -212,6 +209,7 @@ public class GameScreen implements Screen {
         players.setProjectionMatrix(viewCamera.combined);
         players.begin();
         //holy crap these are ugly i know
+        // TODO move these to a PlayerBody method
         players.draw(p1.healthBar[p1.health],
                 (float) (p1.getPositionMetres().x - p1.healthBar[p1.health].getWidth()/10/2 * 1.1),
                 p1.getPositionMetres().y + p1.healthBar[p1.health].getHeight()/10,
