@@ -13,6 +13,8 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.viewport.FitViewport;
+import com.badlogic.gdx.utils.viewport.Viewport;
 
 public class GameScreen implements Screen {
     /**Settings stuff**/
@@ -38,6 +40,7 @@ public class GameScreen implements Screen {
     private World world;
     private Box2DDebugRenderer debugRenderer;
     private OrthographicCamera camera;
+    private Viewport viewPort;
     private PlayerBody p1, p2;
     private Wall border;
 
@@ -53,6 +56,7 @@ public class GameScreen implements Screen {
         world.setContactListener(new CollisionDetection());
         debugRenderer = new Box2DDebugRenderer(); //TODO remove later
         camera = new OrthographicCamera(WIDTH, HEIGHT); //16:9 aspect ratio
+        viewPort = new FitViewport(WIDTH, HEIGHT, camera);
 
         /**set up accelerometer calibration**/
         //takes in accelerometer data when play button is pressed, and sets that as the "zero" position
@@ -189,10 +193,13 @@ public class GameScreen implements Screen {
         //health bar
         healthBar.begin(ShapeRenderer.ShapeType.Filled);
         healthBar.setColor(Color.GREEN);
-        int healthWidth = 10;
-        for(int i = 0; i < p1.health; ++i) {
+        int healthWidth = 10; //width of 1 hp square
+        for(int i = 0; i < p1.health; ++i) { //for p1, it is always centred on screen so draw it there
             healthBar.rect(Gdx.graphics.getWidth() / 2 + (healthWidth+2)*i - 30,
                     Gdx.graphics.getHeight() / 2 + 30, 10, 10);
+        }
+        for(int i = 0; i < p2.health; ++i) {
+
         }
         healthBar.end();
         //Ammo indicator
@@ -256,7 +263,8 @@ public class GameScreen implements Screen {
 
     @Override
     public void resize(int width, int height) {
-
+        System.out.println(Gdx.graphics.getWidth());
+        viewPort.update(width, height, false);
     }
 
     @Override

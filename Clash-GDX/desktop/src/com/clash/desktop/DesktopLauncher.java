@@ -11,6 +11,9 @@ public class DesktopLauncher {
 		config.vSyncEnabled = true;
 		config.width = 1280;
 		config.height = 720;
+		/*config.fullscreen = true;
+		config.width = 1920;
+		config.height = 1080;*/
 		new LwjglApplication(new Clash(), config);
 	}
 }
