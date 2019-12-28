@@ -40,14 +40,13 @@ public class GameScreen implements Screen {
     private World world;
     private Box2DDebugRenderer debugRenderer;
     private OrthographicCamera viewCamera;
-    private OrthographicCamera opponentCamera;
     private Viewport viewPort;
     private PlayerBody p1, p2;
     private Wall border;
 
     /**Player Objects**/
-    private SpriteBatch thisPlayer = new SpriteBatch();
-    private SpriteBatch opponentPlayer = new SpriteBatch();
+    private SpriteBatch players = new SpriteBatch();
+
 
     /**HUD objects**/
     private SpriteBatch hud = new SpriteBatch();
@@ -60,11 +59,9 @@ public class GameScreen implements Screen {
         world.setContactListener(new CollisionDetection());
         debugRenderer = new Box2DDebugRenderer(); //TODO remove later
         viewCamera = new OrthographicCamera(WIDTH, HEIGHT); //16:9 aspect ratio
+        viewCamera.position.set(WIDTH/2, HEIGHT/2, 0);
         viewPort = new FitViewport(WIDTH, HEIGHT, viewCamera);
-        opponentCamera = new OrthographicCamera(WIDTH, HEIGHT);
-
-        thisPlayer.setProjectionMatrix(viewCamera.combined);
-        opponentPlayer.setProjectionMatrix(opponentCamera.combined);
+        players.setProjectionMatrix(viewCamera.combined);
 
         /**set up accelerometer calibration**/
         //takes in accelerometer data when play button is pressed, and sets that as the "zero" position
@@ -99,7 +96,6 @@ public class GameScreen implements Screen {
                 new Vector2(-1, 3)
         });
         wall1.addWallWorld(world);
-
 
         /**inline input processor functions**/
         Gdx.input.setInputProcessor(new InputProcessor() {
@@ -212,12 +208,32 @@ public class GameScreen implements Screen {
                     bulletHeight);
         hud.end();
 
-        /**Render the player**/
-        thisPlayer.begin();
-        //health bar
-        thisPlayer.draw(p1.healthBar[p1.health], -6, 3, p1.healthBar[p1.health].getWidth()/10, p1.healthBar[p1.health].getHeight()/10);
-        thisPlayer.draw(p1.playerTexture, -3, -3, 6, 6);
-        thisPlayer.end();
+        /**Render the players**/
+        players.setProjectionMatrix(viewCamera.combined);
+        players.begin();
+        //holy crap these are ugly i know
+        players.draw(p1.healthBar[p1.health],
+                (float) (p1.getPositionMetres().x - p1.healthBar[p1.health].getWidth()/10/2 * 1.1),
+                p1.getPositionMetres().y + p1.healthBar[p1.health].getHeight()/10,
+                p1.healthBar[p1.health].getWidth()/10,
+                p1.healthBar[p1.health].getHeight()/10);
+        players.draw(p1.playerTexture,
+                p1.getPositionMetres().x - 3,
+                p1.getPositionMetres().y - 3,
+                6,
+                6);
+
+        players.draw(p2.healthBar[p2.health],
+                (float) (p2.getPositionMetres().x - p2.healthBar[p2.health].getWidth()/10/2 * 1.1),
+                p2.getPositionMetres().y + p2.healthBar[p2.health].getHeight()/10,
+                p2.healthBar[p1.health].getWidth()/10,
+                p2.healthBar[p1.health].getHeight()/10);
+        players.draw(p2.playerTexture,
+                p2.getPositionMetres().x - 3,
+                p2.getPositionMetres().y - 3,
+                6,
+                6);
+        players.end();
 
         /**Update player characteristics**/
         updateBodies(); //clear the screen of bullets that have collided with things, and update player health
@@ -237,11 +253,8 @@ public class GameScreen implements Screen {
         viewCamera.position.set(p1.getPositionMetres().x, p1.getPositionMetres().y, 0);
         viewCamera.update();
 
-        /**Move opponent camera**/
-        opponentCamera.position.set(p2.getPositionMetres().x, p2.getPositionMetres().y, 0);
-        opponentCamera.update();
-
         debugRenderer.render(world, viewCamera.combined); //TODO remove later
+
     }
     private Vector2 calibrateAccelerometerXYZ(float x, float y, float z) {
         Vector3 temp = new Vector3(x, y, z);
