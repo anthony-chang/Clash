@@ -1,6 +1,7 @@
 package com.clash;
 
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.*;
 
@@ -47,7 +48,11 @@ public class PlayerBody {
         playerFixtureDef.density = 1f;
         playerFixtureDef.restitution = 0.5f;
         playerFixtureDef.filter.categoryBits = (playerNum == 1)? GameScreen.CATEGORY_PLAYER1:GameScreen.CATEGORY_PLAYER2; //PLAYER FILTER INDEX
-        playerFixtureDef.filter.maskBits = GameScreen.CATEGORY_MAP | GameScreen.CATEGORY_BULLET;
+
+        playerFixtureDef.filter.maskBits = GameScreen.CATEGORY_PLAYER1 |
+                        GameScreen.CATEGORY_PLAYER2 |
+                        GameScreen.CATEGORY_MAP |
+                        GameScreen.CATEGORY_BULLET;
 
         //health bar stuff
         healthBar = new Texture[7];
@@ -74,10 +79,6 @@ public class PlayerBody {
         movement.x = accelerometerY*2000;
         movement.y = -accelerometerX*2000;
     }
-    public boolean playerHit() { //decrement the player's health
-        --health;
-        return health == 0; //returns true if player is dead
-    }
     public void updateAmmo(float deltaTime) {
         if(ammo == MAX_AMMO) //don't do anything at max ammo
             return;
@@ -91,5 +92,17 @@ public class PlayerBody {
         if(ammo == MAX_AMMO)
             return 1;
         return curTime/RELOAD_TIME;
+    }
+    public void draw(SpriteBatch batch) {
+        batch.draw(healthBar[health],
+                (float) (getPositionMetres().x - healthBar[health].getWidth()/10/2 * 1.1),
+                getPositionMetres().y + healthBar[health].getHeight()/10,
+                healthBar[health].getWidth()/10,
+                healthBar[health].getHeight()/10);
+        batch.draw(playerTexture,
+                getPositionMetres().x - 3,
+                getPositionMetres().y - 3,
+                6,
+                6);
     }
 }
