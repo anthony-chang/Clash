@@ -4,10 +4,12 @@ import com.badlogic.gdx.Game;
 
 public class Clash extends Game {
 	public static final String TITLE = "Clash", VERSION = "0.00";
-	
+
+	public static TitleScreen titleScreen = new TitleScreen();
+
 	@Override
 	public void create () {
-		setScreen(new TitleScreen());
+		setScreen(titleScreen);
 	}
 
 	@Override

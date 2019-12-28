@@ -80,7 +80,7 @@ public class TitleScreen implements Screen {
 
     @Override
     public void resize(int width, int height) {
-        stage.getViewport().update(width, height, false);
+        stage.getViewport().update(width, height, true);
         table.setClip(true);
         table.setSize(width, height);
     }

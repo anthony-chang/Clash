@@ -29,7 +29,9 @@ public class GameScreen implements Screen {
     /**Simulation properties and screen size**/
     private final static float TIMESTEP = 1/60f;
     private final static int VELOCITYITERATIONS = 30, POSITIONITERATIONS = 15;
-    final static int WIDTH = 160, HEIGHT = 90; //metres
+    static int WIDTH_PIXELS = Gdx.graphics.getWidth(), HEIGHT_PIXELS = Gdx.graphics.getHeight();
+    final static int WIDTH = WIDTH_PIXELS/10, HEIGHT = HEIGHT_PIXELS/10; //metres
+
 
     /**Accelerometer stuff**/
     private final boolean accelerometerAvailable = Gdx.input.isPeripheralAvailable(Input.Peripheral.Accelerometer);
@@ -44,9 +46,11 @@ public class GameScreen implements Screen {
     private PlayerBody p1, p2;
     private Wall border;
 
+    /**Player Objects**/
+    private SpriteBatch players = new SpriteBatch();
+
     /**HUD objects**/
     private SpriteBatch hud = new SpriteBatch();
-    private ShapeRenderer healthBar = new ShapeRenderer();
     private Texture bulletTexture = new Texture("bullet.png");
 
     @Override
@@ -155,8 +159,8 @@ public class GameScreen implements Screen {
                 //auto aim at player 1
                 if(p2.ammo > 0) {
                     --p2.ammo;
-                    Bullet bullet2 = new Bullet(2, p2.getPositionMetres().x, p2.getPositionMetres().y, p1.getPositionMetres().x, p1.getPositionMetres().y, true);
-                    bullet2.addBulletToWorld(world);
+                    //Bullet bullet2 = new Bullet(2, p2.getPositionMetres().x, p2.getPositionMetres().y, p1.getPositionMetres().x, p1.getPositionMetres().y, true);
+                    //bullet2.addBulletToWorld(world);
                 }
                 return false;
             }
@@ -190,20 +194,11 @@ public class GameScreen implements Screen {
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
         /**Render the HUD**/
-        //health bar
-        healthBar.begin(ShapeRenderer.ShapeType.Filled);
-        healthBar.setColor(Color.GREEN);
-        int healthWidth = 10; //width of 1 hp square
-        for(int i = 0; i < p1.health; ++i) { //for p1, it is always centred on screen so draw it there
-            healthBar.rect(Gdx.graphics.getWidth() / 2 + (healthWidth+2)*i - 30,
-                    Gdx.graphics.getHeight() / 2 + 30, 10, 10);
-        }
-        for(int i = 0; i < p2.health; ++i) {
-
-        }
-        healthBar.end();
-        //Ammo indicator
         hud.begin();
+        //health bar
+        hud.draw(p1.healthBar[p1.health], Gdx.graphics.getWidth()/2 - p1.healthBar[p1.health].getWidth()/2,
+                Gdx.graphics.getHeight()/2 + (int)(p1.healthBar[p1.health].getHeight()/1.1));
+        //Ammo indicator
         int bulletWidth = bulletTexture.getWidth(), bulletHeight = bulletTexture.getHeight();
         for(int i = 0; i < p1.ammo; ++i) { //draw the bullets images on the hud
             hud.draw(bulletTexture, (int) (Gdx.graphics.getWidth() - (bulletWidth * 1.05)), i * bulletHeight);
@@ -215,6 +210,11 @@ public class GameScreen implements Screen {
                     (int) (bulletWidth*p1.getReloadPercentage()),
                     bulletHeight);
         hud.end();
+
+        /**Render the player**/
+        players.begin();
+        players.draw(p1.playerTexture, Gdx.graphics.getWidth()/2 - p1.playerTexture.getWidth()/2, Gdx.graphics.getHeight()/2 - p1.playerTexture.getHeight()/2);
+        players.end();
 
         /**Update player characteristics**/
         updateBodies(); //clear the screen of bullets that have collided with things, and update player health
@@ -255,7 +255,16 @@ public class GameScreen implements Screen {
                 }
                 else if(bodies.get(i).getUserData().equals("PLAYER2_DECREMENT_HEALTH")) {//flagged player 2 as hit
                     --p2.health;
-                    p1.playerBody.setUserData("PLAYER2");
+                    p2.playerBody.setUserData("PLAYER2");
+                }
+
+                if(p1.health == 0) {
+                    System.out.println("Player 2 wins");
+                    ((Game)Gdx.app.getApplicationListener()).setScreen(Clash.titleScreen);
+                }
+                else if(p2.health == 0) {
+                    System.out.println("Player 1 wins");
+                    ((Game)Gdx.app.getApplicationListener()).setScreen(Clash.titleScreen);
                 }
             }
         }
@@ -263,8 +272,7 @@ public class GameScreen implements Screen {
 
     @Override
     public void resize(int width, int height) {
-        System.out.println(Gdx.graphics.getWidth());
-        viewPort.update(width, height, false);
+        viewPort.update(width, height, true);
     }
 
     @Override
@@ -285,9 +293,13 @@ public class GameScreen implements Screen {
     @Override
     public void dispose() {
         p1.playerShape.dispose();
+        for(Texture i:p1.healthBar)
+            i.dispose();
         p2.playerShape.dispose();
+        for(Texture i:p2.healthBar)
+            i.dispose();
+
         bulletTexture.dispose();
-        healthBar.dispose();
         border.wallShape.dispose();
         Array<Body> array = new Array<Body>();
         world.getBodies(array);

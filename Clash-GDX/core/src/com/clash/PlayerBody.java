@@ -1,5 +1,8 @@
 package com.clash;
 
+import com.badlogic.gdx.Game;
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.*;
 
@@ -7,13 +10,15 @@ public class PlayerBody {
     //Define player properties
     private int num;
     int health;
-    final static int MAX_HEALTH = 5;
+    final static int MAX_HEALTH = 6;
     Body playerBody;
     Vector2 movement = new Vector2();
     float speed = 8000;
     BodyDef playerBodyDef;
     FixtureDef playerFixtureDef;
     PolygonShape playerShape;
+    Texture playerTexture;
+    Texture[] healthBar;
 
     //ammo and reload system
     final static int MAX_AMMO = 5;
@@ -26,6 +31,7 @@ public class PlayerBody {
         health = MAX_HEALTH;
         ammo = MAX_AMMO;
         curTime = 0;
+        playerTexture = new Texture((playerNum == 1)? "blue_player.png":"red_player.png");
         //player body definitions
         playerBodyDef = new BodyDef();
         playerBodyDef.type = BodyDef.BodyType.DynamicBody;
@@ -44,6 +50,12 @@ public class PlayerBody {
         playerFixtureDef.restitution = 0.5f;
         playerFixtureDef.filter.categoryBits = (playerNum == 1)? GameScreen.CATEGORY_PLAYER1:GameScreen.CATEGORY_PLAYER2; //PLAYER FILTER INDEX
         playerFixtureDef.filter.maskBits = GameScreen.CATEGORY_MAP | GameScreen.CATEGORY_BULLET;
+
+        //health bar stuff
+        healthBar = new Texture[7];
+        for(int i = 0; i < 7; ++i) {
+            healthBar[i] = new Texture("healthbar_" + i + ".png");
+        }
     }
     public void addPlayerToWorld(World world) {
         playerBody = world.createBody(playerBodyDef);
