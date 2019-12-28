@@ -1,12 +1,10 @@
 package com.clash;
 
 import com.badlogic.gdx.*;
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Quaternion;
 import com.badlogic.gdx.math.Vector2;
@@ -41,13 +39,15 @@ public class GameScreen implements Screen {
     /**Game objects**/
     private World world;
     private Box2DDebugRenderer debugRenderer;
-    private OrthographicCamera camera;
+    private OrthographicCamera viewCamera;
+    private OrthographicCamera opponentCamera;
     private Viewport viewPort;
     private PlayerBody p1, p2;
     private Wall border;
 
     /**Player Objects**/
-    private SpriteBatch players = new SpriteBatch();
+    private SpriteBatch thisPlayer = new SpriteBatch();
+    private SpriteBatch opponentPlayer = new SpriteBatch();
 
     /**HUD objects**/
     private SpriteBatch hud = new SpriteBatch();
@@ -59,8 +59,12 @@ public class GameScreen implements Screen {
         world = new World(new Vector2(0, 0), true);
         world.setContactListener(new CollisionDetection());
         debugRenderer = new Box2DDebugRenderer(); //TODO remove later
-        camera = new OrthographicCamera(WIDTH, HEIGHT); //16:9 aspect ratio
-        viewPort = new FitViewport(WIDTH, HEIGHT, camera);
+        viewCamera = new OrthographicCamera(WIDTH, HEIGHT); //16:9 aspect ratio
+        viewPort = new FitViewport(WIDTH, HEIGHT, viewCamera);
+        opponentCamera = new OrthographicCamera(WIDTH, HEIGHT);
+
+        thisPlayer.setProjectionMatrix(viewCamera.combined);
+        opponentPlayer.setProjectionMatrix(opponentCamera.combined);
 
         /**set up accelerometer calibration**/
         //takes in accelerometer data when play button is pressed, and sets that as the "zero" position
@@ -195,9 +199,6 @@ public class GameScreen implements Screen {
 
         /**Render the HUD**/
         hud.begin();
-        //health bar
-        hud.draw(p1.healthBar[p1.health], Gdx.graphics.getWidth()/2 - p1.healthBar[p1.health].getWidth()/2,
-                Gdx.graphics.getHeight()/2 + (int)(p1.healthBar[p1.health].getHeight()/1.1));
         //Ammo indicator
         int bulletWidth = bulletTexture.getWidth(), bulletHeight = bulletTexture.getHeight();
         for(int i = 0; i < p1.ammo; ++i) { //draw the bullets images on the hud
@@ -212,9 +213,11 @@ public class GameScreen implements Screen {
         hud.end();
 
         /**Render the player**/
-        players.begin();
-        players.draw(p1.playerTexture, Gdx.graphics.getWidth()/2 - p1.playerTexture.getWidth()/2, Gdx.graphics.getHeight()/2 - p1.playerTexture.getHeight()/2);
-        players.end();
+        thisPlayer.begin();
+        //health bar
+        thisPlayer.draw(p1.healthBar[p1.health], -6, 3, p1.healthBar[p1.health].getWidth()/10, p1.healthBar[p1.health].getHeight()/10);
+        thisPlayer.draw(p1.playerTexture, -3, -3, 6, 6);
+        thisPlayer.end();
 
         /**Update player characteristics**/
         updateBodies(); //clear the screen of bullets that have collided with things, and update player health
@@ -231,10 +234,14 @@ public class GameScreen implements Screen {
         world.step(TIMESTEP, VELOCITYITERATIONS, POSITIONITERATIONS); //simulate the physics
 
         /**Centre camera about player**/
-        camera.position.set(p1.getPositionMetres().x, p1.getPositionMetres().y, 0);
-        camera.update();
+        viewCamera.position.set(p1.getPositionMetres().x, p1.getPositionMetres().y, 0);
+        viewCamera.update();
 
-        debugRenderer.render(world, camera.combined); //TODO remove later
+        /**Move opponent camera**/
+        opponentCamera.position.set(p2.getPositionMetres().x, p2.getPositionMetres().y, 0);
+        opponentCamera.update();
+
+        debugRenderer.render(world, viewCamera.combined); //TODO remove later
     }
     private Vector2 calibrateAccelerometerXYZ(float x, float y, float z) {
         Vector3 temp = new Vector3(x, y, z);
