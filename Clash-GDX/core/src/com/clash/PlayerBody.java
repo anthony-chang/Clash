@@ -6,6 +6,8 @@ import com.badlogic.gdx.physics.box2d.*;
 public class PlayerBody {
     //Define player properties
     private int num;
+    int health;
+    final static int MAX_HEALTH = 5;
     Body playerBody;
     Vector2 movement = new Vector2();
     float speed = 8000;
@@ -14,13 +16,14 @@ public class PlayerBody {
     PolygonShape playerShape;
 
     //ammo and reload system
-    final int MAX_AMMO = 5;
+    final static int MAX_AMMO = 5;
     private final float RELOAD_TIME = 1; //1 second to reload
     int ammo;
     float curTime;
 
     public PlayerBody(int playerNum) {
         num = playerNum;
+        health = MAX_HEALTH;
         ammo = MAX_AMMO;
         curTime = 0;
         //player body definitions
@@ -47,7 +50,7 @@ public class PlayerBody {
         playerBody.setUserData((num == 1) ? "PLAYER1":"PLAYER2");
         playerBody.createFixture(playerFixtureDef);
     }
-    public Vector2 getPosition() {
+    public Vector2 getPositionMetres() { //get the player's position in metres, centred about centre
         return playerBody.getPosition();
     }
     public void move(int x, int y) {
@@ -56,14 +59,14 @@ public class PlayerBody {
         if(y != 0)
             movement.y = (y < 0) ? -speed:speed; //down:up
     }
-    public void setMovement(float x, float y) {
-        movement.x = x;
-        movement.y = y;
-    }
     public void moveUsingAccelerometer(float accelerometerX, float accelerometerY) {
         //swap accelerometer x and y since phone is in landscape mode
         movement.x = accelerometerY*2000;
         movement.y = -accelerometerX*2000;
+    }
+    public boolean playerHit() { //decrement the player's health
+        --health;
+        return health == 0; //returns true if player is dead
     }
     public void updateAmmo(float deltaTime) {
         if(ammo == MAX_AMMO) //don't do anything at max ammo
@@ -74,7 +77,7 @@ public class PlayerBody {
             ammo = Math.min(ammo+1, MAX_AMMO); //set cap of ammo
         }
     }
-    public float getReloadPercentage() {
+    public float getReloadPercentage() { //gives % until next bullet available
         if(ammo == MAX_AMMO)
             return 1;
         return curTime/RELOAD_TIME;

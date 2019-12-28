@@ -1,10 +1,12 @@
 package com.clash;
 
 import com.badlogic.gdx.*;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Quaternion;
 import com.badlogic.gdx.math.Vector2;
@@ -41,6 +43,7 @@ public class GameScreen implements Screen {
 
     /**HUD objects**/
     private SpriteBatch hud = new SpriteBatch();
+    private ShapeRenderer healthBar = new ShapeRenderer();
     private Texture bulletTexture = new Texture("bullet.png");
 
     @Override
@@ -133,21 +136,24 @@ public class GameScreen implements Screen {
                     --p1.ammo;
                     Bullet bullet;
                     if(AUTO_AIM) {
-                        bullet = new Bullet(1, p1.getPosition().x, p1.getPosition().y, p2.getPosition().x, p2.getPosition().y, AUTO_AIM);
+                        bullet = new Bullet(1, p1.getPositionMetres().x, p1.getPositionMetres().y, p2.getPositionMetres().x, p2.getPositionMetres().y, AUTO_AIM);
                     }
                     else {
                         //convert mouse (x, y) in pixels (with origin at top left) to (x, y) in metres (with origin at centre)
                         float x_metres = ((float) screenX) / ((float) Gdx.graphics.getWidth()) * WIDTH - WIDTH / 2f;
                         float y_metres = HEIGHT / 2f - ((float) screenY) / ((float) Gdx.graphics.getHeight()) * HEIGHT;
-                        bullet = new Bullet(1, p1.getPosition().x, p1.getPosition().y, x_metres, y_metres, AUTO_AIM);
+                        bullet = new Bullet(1, p1.getPositionMetres().x, p1.getPositionMetres().y, x_metres, y_metres, AUTO_AIM);
                     }
                     bullet.addBulletToWorld(world);
                 }
-                /**Testing Player 2 bullets**/
+                /**Testing Player 2 bullets**/ //TODO remove later
                 //p2 just fires when p1 fires
                 //auto aim at player 1
-                Bullet bullet2 = new Bullet(2, p2.getPosition().x, p2.getPosition().y, p1.getPosition().x, p1.getPosition().y, true);
-                bullet2.addBulletToWorld(world);
+                if(p2.ammo > 0) {
+                    --p2.ammo;
+                    Bullet bullet2 = new Bullet(2, p2.getPositionMetres().x, p2.getPositionMetres().y, p1.getPositionMetres().x, p1.getPositionMetres().y, true);
+                    bullet2.addBulletToWorld(world);
+                }
                 return false;
             }
 
@@ -180,6 +186,16 @@ public class GameScreen implements Screen {
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
         /**Render the HUD**/
+        //health bar
+        healthBar.begin(ShapeRenderer.ShapeType.Filled);
+        healthBar.setColor(Color.GREEN);
+        int healthWidth = 10;
+        for(int i = 0; i < p1.health; ++i) {
+            healthBar.rect(Gdx.graphics.getWidth() / 2 + (healthWidth+2)*i - 30,
+                    Gdx.graphics.getHeight() / 2 + 30, 10, 10);
+        }
+        healthBar.end();
+        //Ammo indicator
         hud.begin();
         int bulletWidth = bulletTexture.getWidth(), bulletHeight = bulletTexture.getHeight();
         for(int i = 0; i < p1.ammo; ++i) { //draw the bullets images on the hud
@@ -194,9 +210,11 @@ public class GameScreen implements Screen {
         hud.end();
 
         /**Update player characteristics**/
-        deleteBullets(); //clear the screen of bullets that have collided with things
+        updateBodies(); //clear the screen of bullets that have collided with things, and update player health
 
-        p1.updateAmmo(Gdx.graphics.getRawDeltaTime()); //update the ammo of the player
+        float deltaTime = Gdx.graphics.getRawDeltaTime();
+        p1.updateAmmo(deltaTime); //update the ammo of the players
+        p2.updateAmmo(deltaTime);
 
         if(accelerometerAvailable) { //mobile controls
             Vector2 temp = calibrateAccelerometerXYZ(Gdx.input.getAccelerometerX(), Gdx.input.getAccelerometerY(), Gdx.input.getAccelerometerZ());
@@ -206,7 +224,7 @@ public class GameScreen implements Screen {
         world.step(TIMESTEP, VELOCITYITERATIONS, POSITIONITERATIONS); //simulate the physics
 
         /**Centre camera about player**/
-        camera.position.set(p1.getPosition().x, p1.getPosition().y, 0);
+        camera.position.set(p1.getPositionMetres().x, p1.getPositionMetres().y, 0);
         camera.update();
 
         debugRenderer.render(world, camera.combined); //TODO remove later
@@ -216,13 +234,21 @@ public class GameScreen implements Screen {
         temp.mul(calibrationMatrix);
         return new Vector2(temp.x, temp.y);
     }
-    private void deleteBullets() {
+    private void updateBodies() {
         if(world.getBodyCount() > 0) {
             Array<Body> bodies = new Array<Body>();
             world.getBodies(bodies);
             for (int i = 0; i < bodies.size; ++i) {
-                if (bodies.get(i).getUserData().equals("DELETE")) {
+                if (bodies.get(i).getUserData().equals("DELETE")) { //flagged for deletion
                     world.destroyBody(bodies.get(i));
+                }
+                else if (bodies.get(i).getUserData().equals("PLAYER1_DECREMENT_HEALTH")) { //flagged player 1 as hit
+                    --p1.health;
+                    p1.playerBody.setUserData("PLAYER1");
+                }
+                else if(bodies.get(i).getUserData().equals("PLAYER2_DECREMENT_HEALTH")) {//flagged player 2 as hit
+                    --p2.health;
+                    p1.playerBody.setUserData("PLAYER2");
                 }
             }
         }
@@ -251,6 +277,14 @@ public class GameScreen implements Screen {
     @Override
     public void dispose() {
         p1.playerShape.dispose();
+        p2.playerShape.dispose();
+        bulletTexture.dispose();
+        healthBar.dispose();
         border.wallShape.dispose();
+        Array<Body> array = new Array<Body>();
+        world.getBodies(array);
+        for (int i = 0; i < array.size; ++i) {
+            world.destroyBody(array.get(i));
+        }
     }
 }

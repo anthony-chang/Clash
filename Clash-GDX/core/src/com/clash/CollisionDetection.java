@@ -14,19 +14,23 @@ public class CollisionDetection implements ContactListener {
         if(objectA.equals("BULLET")) {
             contact.getFixtureA().getBody().setUserData("DELETE");
             if(objectB.equals("PLAYER1")) {
-                System.out.println("Player 1 hit");
+                //System.out.println("Player 1 hit");
+                contact.getFixtureB().getBody().setUserData("PLAYER1_DECREMENT_HEALTH");
             }
             else if (objectB.equals("PLAYER2")) {
-                System.out.println("Player 2 hit");
+                //System.out.println("Player 2 hit");
+                contact.getFixtureB().getBody().setUserData("PLAYER2_DECREMENT_HEALTH");
             }
         }
         if(objectB.equals("BULLET")) {
             contact.getFixtureB().getBody().setUserData("DELETE");
             if(objectA.equals("PLAYER1")) {
-                System.out.println("Player 1 hit");
+                //System.out.println("Player 1 hit");
+                contact.getFixtureA().getBody().setUserData("PLAYER1_DECREMENT_HEALTH");
             }
             else if (objectA.equals("PLAYER2")) {
-                System.out.println("Player 2 hit");
+                //System.out.println("Player 2 hit");
+                contact.getFixtureA().getBody().setUserData("PLAYER2_DECREMENT_HEALTH");
             }
         }
     }
