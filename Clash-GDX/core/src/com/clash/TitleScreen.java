@@ -52,7 +52,7 @@ public class TitleScreen implements Screen {
         textButtonStyle.pressedOffsetX = 1;
         textButtonStyle.pressedOffsetY = -1;
 
-        playButton = new TextButton("PLAY", textButtonStyle);
+        playButton = new TextButton("START", textButtonStyle);
         playButton.pad(20);
 
         table.add(new Image(new SpriteDrawable(title)));
@@ -64,7 +64,7 @@ public class TitleScreen implements Screen {
         playButton.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                ((Game)Gdx.app.getApplicationListener()).setScreen(new GameScreen());
+                ((Game)Gdx.app.getApplicationListener()).setScreen(new LevelMenu());
             }
         });
     }

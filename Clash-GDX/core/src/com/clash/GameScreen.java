@@ -86,7 +86,25 @@ public class GameScreen implements Screen {
         border.addWallWorld(world);
 
         //create the map using the JSON files
-        map = new MapGenerator("maps/map_1.json");
+        if (LevelMenu.getMap() == "Sieve"){
+            map = new MapGenerator("maps/map_1.json");
+        }
+        else if (LevelMenu.getMap() == "Open Field"){
+            map = new MapGenerator("maps/map_2.json");
+        }
+        else if (LevelMenu.getMap() == "Maze"){
+            map = new MapGenerator("maps/map_3.json");
+        }
+        else if (LevelMenu.getMap() == "Ball Pit"){
+            map = new MapGenerator("maps/map_4.json");
+        }
+        else if (LevelMenu.getMap() == "Boxy"){
+            map = new MapGenerator("maps/map_5.json");
+        }
+        else { // safety
+            map = new MapGenerator("maps/map_1.json");
+        }
+
         for(Wall i : map.walls) {
             i.addWallWorld(world);
         }
@@ -278,11 +296,11 @@ public class GameScreen implements Screen {
 
                 if(p1.health == 0) {
                     System.out.println("Player 2 wins");
-                    ((Game)Gdx.app.getApplicationListener()).setScreen(Clash.titleScreen);
+                    ((Game)Gdx.app.getApplicationListener()).setScreen(new LevelMenu());
                 }
                 else if(p2.health == 0) {
                     System.out.println("Player 1 wins");
-                    ((Game)Gdx.app.getApplicationListener()).setScreen(Clash.titleScreen);
+                    ((Game)Gdx.app.getApplicationListener()).setScreen(new LevelMenu());
                 }
             }
         }
