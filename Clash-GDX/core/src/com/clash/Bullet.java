@@ -9,6 +9,8 @@ public class Bullet{
     FixtureDef bulletFixtureDef;
     PolygonShape bulletShape;
 
+    final static int VELOCITY_SCALING_FACTOR = 1000;
+
     public Bullet(int playerNum, float x, float y, float mouseX, float mouseY, boolean autoAim) {
         //body definitions
         bulletBodyDef = new BodyDef();
@@ -49,7 +51,8 @@ public class Bullet{
 
     private Vector2 getVelocityVector(float startX, float startY, float destX, float destY) {
         float magnitude = (float) Math.sqrt(((destX-startX)*(destX-startX))+((destY-startY)*(destY-startY)));
-        return new Vector2((destX-startX)/magnitude*500, (destY-startY)/magnitude*500);
+        return new Vector2((destX-startX)/magnitude*VELOCITY_SCALING_FACTOR,
+                (destY-startY)/magnitude*VELOCITY_SCALING_FACTOR);
     }
 
 }

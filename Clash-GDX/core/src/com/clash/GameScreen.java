@@ -177,8 +177,8 @@ public class GameScreen implements Screen {
                 //auto aim at player 1
                 if(p2.ammo > 0) {
                     --p2.ammo;
-                    //Bullet bullet2 = new Bullet(2, p2.getPositionMetres().x, p2.getPositionMetres().y, p1.getPositionMetres().x, p1.getPositionMetres().y, true);
-                    //bullet2.addBulletToWorld(world);
+                    Bullet bullet2 = new Bullet(2, p2.getPositionMetres().x, p2.getPositionMetres().y, p1.getPositionMetres().x, p1.getPositionMetres().y, true);
+                    bullet2.addBulletToWorld(world);
                 }
                 return false;
             }
@@ -226,32 +226,11 @@ public class GameScreen implements Screen {
                     bulletHeight);
         hud.end();
 
-        /**Render the players**/
+        /**Render the players and their health bars**/
         players.setProjectionMatrix(viewCamera.combined);
         players.begin();
-        //holy crap these are ugly i know
-        // TODO move these to a PlayerBody method
-        players.draw(p1.healthBar[p1.health],
-                (float) (p1.getPositionMetres().x - p1.healthBar[p1.health].getWidth()/10/2 * 1.1),
-                p1.getPositionMetres().y + p1.healthBar[p1.health].getHeight()/10,
-                p1.healthBar[p1.health].getWidth()/10,
-                p1.healthBar[p1.health].getHeight()/10);
-        players.draw(p1.playerTexture,
-                p1.getPositionMetres().x - 3,
-                p1.getPositionMetres().y - 3,
-                6,
-                6);
-
-        players.draw(p2.healthBar[p2.health],
-                (float) (p2.getPositionMetres().x - p2.healthBar[p2.health].getWidth()/10/2 * 1.1),
-                p2.getPositionMetres().y + p2.healthBar[p2.health].getHeight()/10,
-                p2.healthBar[p1.health].getWidth()/10,
-                p2.healthBar[p1.health].getHeight()/10);
-        players.draw(p2.playerTexture,
-                p2.getPositionMetres().x - 3,
-                p2.getPositionMetres().y - 3,
-                6,
-                6);
+        p1.draw(players);
+        p2.draw(players);
         players.end();
 
         /**Update player characteristics**/
