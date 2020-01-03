@@ -8,6 +8,9 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 
 import io.socket.client.Socket;
 import io.socket.client.IO;
+import io.socket.emitter.Emitter;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 
 public class MultiplayerDemo extends ApplicationAdapter {
@@ -19,7 +22,10 @@ public class MultiplayerDemo extends ApplicationAdapter {
 	public void create () {
 		batch = new SpriteBatch();
 		img = new Texture("badlogic.jpg");
+
+		// initialize socket and socket events
 		connectSocket();
+		configSocketEvents();
 	}
 
 	@Override
@@ -45,5 +51,37 @@ public class MultiplayerDemo extends ApplicationAdapter {
 		catch(Exception e){
 			System.out.println(e);
 		}
+	}
+	public void configSocketEvents(){
+		socket.on(Socket.EVENT_CONNECT, new Emitter.Listener() {
+			@Override
+			public void call(Object... args) {
+				Gdx.app.log("SocketIO","Connected");
+			}
+		}).on("socketID", new Emitter.Listener() {
+			@Override
+			public void call(Object... args) {
+				JSONObject data = (JSONObject) args[0];
+				try{
+					String id = data.getString("id");
+					Gdx.app.log("SocketIO", "My id: " + id);
+				}
+				catch(JSONException e){
+					Gdx.app.log("SocketIO","Error getting ID");
+				}
+			}
+		}).on("newPlayer", new Emitter.Listener() {
+			@Override
+			public void call(Object... args) {
+				JSONObject data = (JSONObject) args[0];
+				try{
+					String id = data.getString("id");
+					Gdx.app.log("SocketIO", "New player connect: " + id);
+				}
+				catch(JSONException e){
+					Gdx.app.log("SocketIO","Error getting New PlayerID");
+				}
+			}
+		});
 	}
 }
