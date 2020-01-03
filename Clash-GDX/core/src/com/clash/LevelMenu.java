@@ -58,7 +58,7 @@ public class LevelMenu implements Screen {
         table.setBounds(0,0,Gdx.graphics.getWidth(),Gdx.graphics.getHeight());
 
         list = new List<String>(skin);
-        list.setItems(new String[] {"Sieve", "Open Field", "Maze", "Ball Pit", "Boxy"});
+        list.setItems(new String[] {"Sieve", "Open Field", "Maze", "Ball Pit", "Boxy", "Pillars"});
 
         scrollPane = new ScrollPane(list, skin);
 

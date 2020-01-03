@@ -101,6 +101,9 @@ public class GameScreen implements Screen {
         else if (LevelMenu.getMap() == "Boxy"){
             map = new MapGenerator("maps/map_5.json");
         }
+        else if (LevelMenu.getMap() == "Pillars"){
+            map = new MapGenerator("maps/map_6.json");
+        }
         else { // safety
             map = new MapGenerator("maps/map_1.json");
         }
