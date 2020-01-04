@@ -20,3 +20,9 @@ The coordinate corresponds to the center of the object.
 
 width and height:
 Note that the object "expands" from the center of the object
+
+
+Running two instances of the same class (intelliJ)
+- Go to Edit Configurations, click '+' and create a Compound Run Configuration
+- Place two Desktop Configurations (identical) into the Compound Run Configuration
+- Click 'Run' with Coverage (two buttons left of standard Run button)
