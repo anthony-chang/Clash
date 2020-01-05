@@ -19,6 +19,8 @@ import java.util.HashMap;
 
 
 public class MultiplayerDemo extends ApplicationAdapter {
+	private final float UPDATE_TIME = 1/60f;
+	float timer;
 	SpriteBatch batch;
 	private Socket socket;
 	String id;
@@ -56,11 +58,28 @@ public class MultiplayerDemo extends ApplicationAdapter {
 		}
 	}
 
+	public void updateServer(float dt){
+		timer += dt;
+		if (timer >= UPDATE_TIME && player != null && player.hasMoved()){
+			JSONObject data = new JSONObject();
+			try{
+				data.put("x", player.getX());
+				data.put("y", player.getY());
+				socket.emit("playerMoved", data);
+			}
+			catch (JSONException e){
+				Gdx.app.log("SOCKET.IO", "Error sending update data");
+			}
+		}
+	}
+
 	@Override
 	public void render () {
 		Gdx.gl.glClearColor(0, 0, 0, 1);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+
 		handleInput(Gdx.graphics.getDeltaTime());
+		updateServer(Gdx.graphics.getDeltaTime());
 
 		batch.begin();
 		if (player != null){
@@ -112,9 +131,9 @@ public class MultiplayerDemo extends ApplicationAdapter {
 			public void call(Object... args) {
 				JSONObject data = (JSONObject) args[0];
 				try{
-					id = data.getString("id");
-					Gdx.app.log("SocketIO", "New player connect: " + id);
-					friendlyPlayers.put(id, new PlayerBody(friendlyShip));
+					String playerID = data.getString("id"); // id is client's id, playerID is another client's id
+					Gdx.app.log("SocketIO", "New player connect: " + playerID);
+					friendlyPlayers.put(playerID, new PlayerBody(friendlyShip));
 				}
 				catch(JSONException e){
 					Gdx.app.log("SocketIO","Error getting New PlayerID");
@@ -127,6 +146,22 @@ public class MultiplayerDemo extends ApplicationAdapter {
 				try{
 					id = data.getString("id");
 					friendlyPlayers.remove(id);
+				}
+				catch(JSONException e){
+					Gdx.app.log("SocketIO","Error getting disconnected PlayerID");
+				}
+			}
+		}).on("playerMoved", new Emitter.Listener() { // server will be sending data from a different client
+			@Override
+			public void call(Object... args) {
+				JSONObject data = (JSONObject) args[0];
+				try{
+					String playerID = data.getString("id");
+					Double x = data.getDouble("x");
+					Double y = data.getDouble("y");
+					if (friendlyPlayers.get(playerID) != null){
+						friendlyPlayers.get(playerID).setPosition(x.floatValue(), y.floatValue());
+					}
 				}
 				catch(JSONException e){
 					Gdx.app.log("SocketIO","Error getting disconnected PlayerID");

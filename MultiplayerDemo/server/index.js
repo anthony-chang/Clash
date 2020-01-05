@@ -18,6 +18,22 @@ io.on('connection', function(socket){
     // this sends it to all other connected sockets but not the socket itself
     socket.broadcast.emit('newPlayer', { id: socket.id });
 
+    socket.on('playerMoved', function(data){
+        data.id = socket.id;
+        socket.broadcast.emit('playerMoved', data);
+
+        console.log("playerMoved: " + "ID: " + data.id
+                                    + "X: " + data.x
+                                    + "Y: " + data.y);
+
+        for (var i = 0; i < players.length; i++){
+            if (players[i].id === data.id){
+                players[i].x = data.x;
+                players[i].y = data.y;
+            }
+        }
+    });
+
     // when a player disconnects
     socket.on ('disconnect', function() {
         console.log("Player disconnected");
