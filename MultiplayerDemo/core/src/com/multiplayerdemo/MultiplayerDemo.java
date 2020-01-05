@@ -7,9 +7,11 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 
+import com.badlogic.gdx.math.Vector2;
 import io.socket.client.Socket;
 import io.socket.client.IO;
 import io.socket.emitter.Emitter;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -73,7 +75,6 @@ public class MultiplayerDemo extends ApplicationAdapter {
 	@Override
 	public void dispose () {
 		super.dispose();
-		batch.dispose();
 		playerShip.dispose();
 		friendlyShip.dispose();
 	}
@@ -117,6 +118,37 @@ public class MultiplayerDemo extends ApplicationAdapter {
 				}
 				catch(JSONException e){
 					Gdx.app.log("SocketIO","Error getting New PlayerID");
+				}
+			}
+		}).on("playerDisconnected", new Emitter.Listener() {
+			@Override
+			public void call(Object... args) {
+				JSONObject data = (JSONObject) args[0];
+				try{
+					id = data.getString("id");
+					friendlyPlayers.remove(id);
+				}
+				catch(JSONException e){
+					Gdx.app.log("SocketIO","Error getting disconnected PlayerID");
+				}
+			}
+		}).on("getPlayers", new Emitter.Listener() {
+			@Override
+			public void call(Object... args) {
+				JSONArray objects = (JSONArray) args[0];
+				try{
+					for (int i = 0; i < objects.length(); i++){
+						PlayerBody coopPlayer = new PlayerBody(friendlyShip);
+						Vector2 position = new Vector2();
+						position.x = ((Double) objects.getJSONObject(i).getDouble("x")).floatValue();
+						position.y = ((Double) objects.getJSONObject(i).getDouble("y")).floatValue();
+						coopPlayer.setPosition(position.x, position.y);
+
+						friendlyPlayers.put(objects.getJSONObject(i).getString("id"), coopPlayer);
+					}
+				}
+				catch(JSONException e){
+
 				}
 			}
 		});
