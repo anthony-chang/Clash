@@ -26,7 +26,7 @@ public class Clash extends Game {
 			socket.connect();
 		}
 		catch(Exception e){
-			System.out.println(e);
+			e.printStackTrace();
 		}
 	}
 
