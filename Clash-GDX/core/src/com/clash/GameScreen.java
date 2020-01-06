@@ -20,6 +20,8 @@ import io.socket.emitter.Emitter;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.HashMap;
+
 public class GameScreen implements Screen {
     /**Settings stuff**/
     static boolean AUTO_AIM = false; //set to true for bullets to target opponent automatically
@@ -62,6 +64,7 @@ public class GameScreen implements Screen {
 
     /**Server Variables**/
     private Socket socket;
+    HashMap<String, PlayerBody> friendlyPlayers;
 
     @Override
     public void show() {
@@ -89,10 +92,18 @@ public class GameScreen implements Screen {
         /**Set up the objects in the world**/
         p1 = new PlayerBody(1);
         p1.addPlayerToWorld(world);
-        p2 = new PlayerBody(2);
-        p2.addPlayerToWorld(world);
+        //p2 = new PlayerBody(2);
+        //p2.addPlayerToWorld(world);
         border = new Wall(WIDTH, HEIGHT);
         border.addWallWorld(world);
+
+        /** Server code**/
+        friendlyPlayers = new HashMap<String, PlayerBody>();
+
+        connectSocket();
+        configSocketEvents();
+
+        /**End of Server code**/
 
         //create the map using the JSON files
         if (LevelMenu.getMap() == "Sieve"){
@@ -171,7 +182,13 @@ public class GameScreen implements Screen {
                     --p1.ammo;
                     Bullet bullet;
                     if(AUTO_AIM) {
-                        bullet = new Bullet(1, p1.getPositionMetres().x, p1.getPositionMetres().y, p2.getPositionMetres().x, p2.getPositionMetres().y, AUTO_AIM);
+                        //bullet = new Bullet(1, p1.getPositionMetres().x, p1.getPositionMetres().y, p2.getPositionMetres().x, p2.getPositionMetres().y, AUTO_AIM);
+
+                        /** QUICK FIX: AUTO_AIM DISABLED (original code above)**/
+                        //convert mouse (x, y) in pixels (with origin at top left) to (x, y) in metres (with origin at centre)
+                        float x_metres = ((float) screenX) / ((float) Gdx.graphics.getWidth()) * WIDTH - WIDTH / 2f;
+                        float y_metres = HEIGHT / 2f - ((float) screenY) / ((float) Gdx.graphics.getHeight()) * HEIGHT;
+                        bullet = new Bullet(1, p1.getPositionMetres().x, p1.getPositionMetres().y, x_metres, y_metres, AUTO_AIM);
                     }
                     else {
                         //convert mouse (x, y) in pixels (with origin at top left) to (x, y) in metres (with origin at centre)
@@ -212,10 +229,6 @@ public class GameScreen implements Screen {
                 return false;
             }
         });
-
-        /** Server code**/
-        connectSocket();
-        configSocketEvents();
     }
 
     @Override
@@ -243,7 +256,16 @@ public class GameScreen implements Screen {
         players.setProjectionMatrix(viewCamera.combined);
         players.begin();
         p1.draw(players);
-        p2.draw(players);
+        for(HashMap.Entry<String, PlayerBody> entry : friendlyPlayers.entrySet()){
+            entry.getValue().draw(players);
+        }
+
+        try {
+            p2.draw(players);
+        }
+        catch (NullPointerException e) {
+
+        }
         players.end();
 
         /**Update player characteristics**/
@@ -251,7 +273,7 @@ public class GameScreen implements Screen {
 
         float deltaTime = Gdx.graphics.getRawDeltaTime();
         p1.updateAmmo(deltaTime); //update the ammo of the players
-        p2.updateAmmo(deltaTime);
+        //p2.updateAmmo(deltaTime);
 
         if(accelerometerAvailable) { //mobile controls
             Vector2 temp = calibrateAccelerometerXYZ(Gdx.input.getAccelerometerX(), Gdx.input.getAccelerometerY(), Gdx.input.getAccelerometerZ());
@@ -285,18 +307,20 @@ public class GameScreen implements Screen {
                     p1.playerBody.setUserData("PLAYER1");
                 }
                 else if(bodies.get(i).getUserData().equals("PLAYER2_DECREMENT_HEALTH")) {//flagged player 2 as hit
-                    --p2.health;
-                    p2.playerBody.setUserData("PLAYER2");
+                    //--p2.health;
+                    //p2.playerBody.setUserData("PLAYER2");
                 }
 
                 if(p1.health == 0) {
                     System.out.println("Player 2 wins");
                     ((Game)Gdx.app.getApplicationListener()).setScreen(new LevelMenu());
                 }
+                /**
                 else if(p2.health == 0) {
                     System.out.println("Player 1 wins");
                     ((Game)Gdx.app.getApplicationListener()).setScreen(new LevelMenu());
                 }
+                 **/
             }
         }
     }
@@ -326,9 +350,12 @@ public class GameScreen implements Screen {
         p1.playerShape.dispose();
         for(Texture i:p1.healthBar)
             i.dispose();
+
+        /**
         p2.playerShape.dispose();
         for(Texture i:p2.healthBar)
             i.dispose();
+         **/
 
         bulletTexture.dispose();
         border.wallShape.dispose();
@@ -374,6 +401,9 @@ public class GameScreen implements Screen {
                 try {
                     String id = data.getString("id");
                     Gdx.app.log("SocketIO","New Player Connect: " + id);
+                    p2 = new PlayerBody(2);
+                    friendlyPlayers.put(id, p2);
+                    p2.addPlayerToWorld(world);
                 }
                 catch (JSONException e){
                     Gdx.app.log("SocketIO","Error getting New PlayerID");
