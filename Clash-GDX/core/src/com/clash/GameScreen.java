@@ -13,6 +13,12 @@ import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
+import com.badlogic.gdx.Gdx;
+import io.socket.client.IO;
+import io.socket.client.Socket;
+import io.socket.emitter.Emitter;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 public class GameScreen implements Screen {
     /**Settings stuff**/
@@ -53,6 +59,9 @@ public class GameScreen implements Screen {
     /**HUD objects**/
     private SpriteBatch hud = new SpriteBatch();
     private Texture bulletTexture = new Texture("bullet.png");
+
+    /**Server Variables**/
+    private Socket socket;
 
     @Override
     public void show() {
@@ -203,6 +212,10 @@ public class GameScreen implements Screen {
                 return false;
             }
         });
+
+        /** Server code**/
+        connectSocket();
+        configSocketEvents();
     }
 
     @Override
@@ -324,5 +337,48 @@ public class GameScreen implements Screen {
         for (int i = 0; i < array.size; ++i) {
             world.destroyBody(array.get(i));
         }
+    }
+
+    public void connectSocket(){
+        try{
+            socket = IO.socket("http://localhost:8080");
+            socket.connect();
+        }
+        catch(Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    public void configSocketEvents(){
+        socket.on(Socket.EVENT_CONNECT, new Emitter.Listener() {
+            @Override
+            public void call(Object... args) {
+                Gdx.app.log("SocketIO","Connected");
+            }
+        }).on("socketID", new Emitter.Listener() {
+            @Override
+            public void call(Object... args) {
+                JSONObject data = (JSONObject) args[0];
+                try {
+                    String id = data.getString("id");
+                    Gdx.app.log("SocketIO","My id: " + id);
+                }
+                catch (JSONException e){
+                    Gdx.app.log("SocketIO","Error getting ID");
+                }
+            }
+        }).on("newPlayer", new Emitter.Listener() {
+            @Override
+            public void call(Object... args) {
+                JSONObject data = (JSONObject) args[0];
+                try {
+                    String id = data.getString("id");
+                    Gdx.app.log("SocketIO","New Player Connect: " + id);
+                }
+                catch (JSONException e){
+                    Gdx.app.log("SocketIO","Error getting New PlayerID");
+                }
+            }
+        });
     }
 }
