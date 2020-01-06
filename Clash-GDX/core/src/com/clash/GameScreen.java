@@ -64,6 +64,7 @@ public class GameScreen implements Screen {
 
     /**Server Variables**/
     private Socket socket;
+    private boolean p2_connected = false;
 
     @Override
     public void show() {
@@ -252,11 +253,8 @@ public class GameScreen implements Screen {
         players.setProjectionMatrix(viewCamera.combined);
         players.begin();
         p1.draw(players);
-        try {
+        if(p2_connected) {
             p2.draw(players);
-        }
-        catch (NullPointerException e) {
-            e.printStackTrace();
         }
         players.end();
 
@@ -299,8 +297,8 @@ public class GameScreen implements Screen {
                     p1.playerBody.setUserData("PLAYER1");
                 }
                 else if(bodies.get(i).getUserData().equals("PLAYER2_DECREMENT_HEALTH")) {//flagged player 2 as hit
-                    //--p2.health;
-                    //p2.playerBody.setUserData("PLAYER2");
+                    --p2.health;
+                    p2.playerBody.setUserData("PLAYER2");
                 }
 
                 if(p1.health == 0) {
@@ -391,6 +389,7 @@ public class GameScreen implements Screen {
                     String id = data.getString("id");
                     Gdx.app.log("SocketIO","New Player Connect: " + id);
                     p2.addPlayerToWorld(world);
+                    p2_connected = true;
                 }
                 catch (JSONException e){
                     Gdx.app.log("SocketIO","Error getting New PlayerID");
