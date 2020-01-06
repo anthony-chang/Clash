@@ -64,7 +64,6 @@ public class GameScreen implements Screen {
 
     /**Server Variables**/
     private Socket socket;
-    HashMap<String, PlayerBody> friendlyPlayers;
 
     @Override
     public void show() {
@@ -92,17 +91,14 @@ public class GameScreen implements Screen {
         /**Set up the objects in the world**/
         p1 = new PlayerBody(1);
         p1.addPlayerToWorld(world);
-        //p2 = new PlayerBody(2);
+        p2 = new PlayerBody(2);
         //p2.addPlayerToWorld(world);
         border = new Wall(WIDTH, HEIGHT);
         border.addWallWorld(world);
 
         /** Server code**/
-        friendlyPlayers = new HashMap<String, PlayerBody>();
-
         connectSocket();
         configSocketEvents();
-
         /**End of Server code**/
 
         //create the map using the JSON files
@@ -256,15 +252,11 @@ public class GameScreen implements Screen {
         players.setProjectionMatrix(viewCamera.combined);
         players.begin();
         p1.draw(players);
-        for(HashMap.Entry<String, PlayerBody> entry : friendlyPlayers.entrySet()){
-            entry.getValue().draw(players);
-        }
-
         try {
             p2.draw(players);
         }
         catch (NullPointerException e) {
-
+            e.printStackTrace();
         }
         players.end();
 
@@ -315,12 +307,11 @@ public class GameScreen implements Screen {
                     System.out.println("Player 2 wins");
                     ((Game)Gdx.app.getApplicationListener()).setScreen(new LevelMenu());
                 }
-                /**
+
                 else if(p2.health == 0) {
                     System.out.println("Player 1 wins");
                     ((Game)Gdx.app.getApplicationListener()).setScreen(new LevelMenu());
                 }
-                 **/
             }
         }
     }
@@ -351,11 +342,9 @@ public class GameScreen implements Screen {
         for(Texture i:p1.healthBar)
             i.dispose();
 
-        /**
         p2.playerShape.dispose();
         for(Texture i:p2.healthBar)
             i.dispose();
-         **/
 
         bulletTexture.dispose();
         border.wallShape.dispose();
@@ -401,8 +390,6 @@ public class GameScreen implements Screen {
                 try {
                     String id = data.getString("id");
                     Gdx.app.log("SocketIO","New Player Connect: " + id);
-                    p2 = new PlayerBody(2);
-                    friendlyPlayers.put(id, p2);
                     p2.addPlayerToWorld(world);
                 }
                 catch (JSONException e){
