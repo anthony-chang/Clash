@@ -13,8 +13,6 @@ import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
-import io.socket.client.IO;
-import io.socket.client.Socket;
 
 public class GameScreen implements Screen {
     /**Settings stuff**/
@@ -55,9 +53,6 @@ public class GameScreen implements Screen {
     /**HUD objects**/
     private SpriteBatch hud = new SpriteBatch();
     private Texture bulletTexture = new Texture("bullet.png");
-
-    /**Server Variables**/
-    private Socket socket;
 
     @Override
     public void show() {
@@ -208,19 +203,6 @@ public class GameScreen implements Screen {
                 return false;
             }
         });
-
-        /** Server code**/
-        connectSocket();
-    }
-
-    public void connectSocket(){
-        try{
-            socket = IO.socket("http://localhost8080");
-            socket.connect();
-        }
-        catch(Exception e){
-            System.out.println(e);
-        }
     }
 
     @Override
