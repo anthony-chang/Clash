@@ -8,6 +8,13 @@ server.listen(8080, function(){
 
 io.on('connection', function(socket){
     console.log("Player connected!");
+
+    // socketID Event
+    socket.emit ('socketID', { id: socket.id }); // sends client's own ID to client
+
+    // newPlayer Event
+    socket.broadcast.emit ('newPlayer', { id: socket.id }); // sends client's own ID to all other clients
+
     socket.on('disconnect', function(socket){
         console.log("Player disconnected");
     })
