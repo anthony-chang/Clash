@@ -17,6 +17,7 @@ import com.badlogic.gdx.Gdx;
 import io.socket.client.IO;
 import io.socket.client.Socket;
 import io.socket.emitter.Emitter;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -178,13 +179,7 @@ public class GameScreen implements Screen {
                     --p1.ammo;
                     Bullet bullet;
                     if(AUTO_AIM) {
-                        //bullet = new Bullet(1, p1.getPositionMetres().x, p1.getPositionMetres().y, p2.getPositionMetres().x, p2.getPositionMetres().y, AUTO_AIM);
-
-                        /** QUICK FIX: AUTO_AIM DISABLED (original code above)**/
-                        //convert mouse (x, y) in pixels (with origin at top left) to (x, y) in metres (with origin at centre)
-                        float x_metres = ((float) screenX) / ((float) Gdx.graphics.getWidth()) * WIDTH - WIDTH / 2f;
-                        float y_metres = HEIGHT / 2f - ((float) screenY) / ((float) Gdx.graphics.getHeight()) * HEIGHT;
-                        bullet = new Bullet(1, p1.getPositionMetres().x, p1.getPositionMetres().y, x_metres, y_metres, AUTO_AIM);
+                        bullet = new Bullet(1, p1.getPositionMetres().x, p1.getPositionMetres().y, p2.getPositionMetres().x, p2.getPositionMetres().y, AUTO_AIM);
                     }
                     else {
                         //convert mouse (x, y) in pixels (with origin at top left) to (x, y) in metres (with origin at centre)
@@ -265,7 +260,7 @@ public class GameScreen implements Screen {
 
         float deltaTime = Gdx.graphics.getRawDeltaTime();
         p1.updateAmmo(deltaTime); //update the ammo of the players
-        //p2.updateAmmo(deltaTime);
+        p2.updateAmmo(deltaTime);
 
         if(accelerometerAvailable) { //mobile controls
             Vector2 temp = calibrateAccelerometerXYZ(Gdx.input.getAccelerometerX(), Gdx.input.getAccelerometerY(), Gdx.input.getAccelerometerZ());
@@ -299,8 +294,8 @@ public class GameScreen implements Screen {
                     p1.playerBody.setUserData("PLAYER1");
                 }
                 else if(bodies.get(i).getUserData().equals("PLAYER2_DECREMENT_HEALTH")) {//flagged player 2 as hit
-                    //--p2.health;
-                    //p2.playerBody.setUserData("PLAYER2");
+                    --p2.health;
+                    p2.playerBody.setUserData("PLAYER2");
                 }
 
                 if(p1.health == 0) {
@@ -394,6 +389,18 @@ public class GameScreen implements Screen {
                 }
                 catch (JSONException e){
                     Gdx.app.log("SocketIO","Error getting New PlayerID");
+                }
+            }
+        }).on("playerDisconnected", new Emitter.Listener() {
+            @Override
+            public void call(Object... args) {
+                JSONObject data = (JSONObject) args[0];
+                try {
+                    String id = data.getString("id");
+                    world.destroyBody(p2.playerBody);
+                }
+                catch (JSONException e){
+                    Gdx.app.log("SocketIO","Error getting disconnected PlayerID");
                 }
             }
         });
