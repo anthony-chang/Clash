@@ -175,11 +175,11 @@ public class GameScreen implements Screen {
                 /**Testing Player 2 bullets**/ //TODO remove later
                 //p2 just fires when p1 fires
                 //auto aim at player 1
-                if(p2.ammo > 0) {
+                /*if(p2.ammo > 0) {
                     --p2.ammo;
                     Bullet bullet2 = new Bullet(2, p2.getPositionMetres().x, p2.getPositionMetres().y, p1.getPositionMetres().x, p1.getPositionMetres().y, true);
                     bullet2.addBulletToWorld(world);
-                }
+                }*/
                 return false;
             }
 
