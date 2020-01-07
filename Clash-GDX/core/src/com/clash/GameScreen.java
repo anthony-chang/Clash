@@ -14,6 +14,7 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.badlogic.gdx.Gdx;
+import com.clash.server.Server;
 import io.socket.client.IO;
 import io.socket.client.Socket;
 import io.socket.emitter.Emitter;
@@ -64,8 +65,8 @@ public class GameScreen implements Screen {
     private Texture bulletTexture = new Texture("bullet.png");
 
     /**Server Variables**/
-    private Socket socket;
-    private boolean p2_connected = false;
+    Server server;
+    public static boolean p2_connected = false;
 
     @Override
     public void show() {
@@ -99,8 +100,9 @@ public class GameScreen implements Screen {
         border.addWallWorld(world);
 
         /** Server code**/
-        connectSocket();
-        configSocketEvents();
+        server = new Server(world, p1, p2);
+        server.connectSocket();
+        server.configSocketEvents();
         /**End of Server code**/
 
         //create the map using the JSON files
@@ -348,60 +350,4 @@ public class GameScreen implements Screen {
         }
     }
 
-    public void connectSocket(){
-        try{
-            socket = IO.socket("http://localhost:8080");
-            socket.connect();
-        }
-        catch(Exception e){
-            e.printStackTrace();
-        }
-    }
-
-    public void configSocketEvents(){
-        socket.on(Socket.EVENT_CONNECT, new Emitter.Listener() {
-            @Override
-            public void call(Object... args) {
-                Gdx.app.log("SocketIO","Connected");
-            }
-        }).on("socketID", new Emitter.Listener() {
-            @Override
-            public void call(Object... args) {
-                JSONObject data = (JSONObject) args[0];
-                try {
-                    String id = data.getString("id");
-                    Gdx.app.log("SocketIO","My id: " + id);
-                }
-                catch (JSONException e){
-                    Gdx.app.log("SocketIO","Error getting ID");
-                }
-            }
-        }).on("newPlayer", new Emitter.Listener() {
-            @Override
-            public void call(Object... args) {
-                JSONObject data = (JSONObject) args[0];
-                try {
-                    String id = data.getString("id");
-                    Gdx.app.log("SocketIO","New Player Connect: " + id);
-                    p2.addPlayerToWorld(world);
-                    p2_connected = true;
-                }
-                catch (JSONException e){
-                    Gdx.app.log("SocketIO","Error getting New PlayerID");
-                }
-            }
-        }).on("playerDisconnected", new Emitter.Listener() {
-            @Override
-            public void call(Object... args) {
-                JSONObject data = (JSONObject) args[0];
-                try {
-                    String id = data.getString("id");
-                    world.destroyBody(p2.playerBody);
-                }
-                catch (JSONException e){
-                    Gdx.app.log("SocketIO","Error getting disconnected PlayerID");
-                }
-            }
-        });
-    }
 }

@@ -10,7 +10,7 @@ public class PlayerBody {
     private int num;
     int health;
     final static int MAX_HEALTH = 6;
-    Body playerBody;
+    public Body playerBody;
     Vector2 movement = new Vector2();
     float speed = 8000;
     BodyDef playerBodyDef;
