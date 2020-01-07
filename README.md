@@ -26,3 +26,10 @@ Running two instances of the same class (intelliJ)
 - Go to Edit Configurations, click '+' and create a Compound Run Configuration
 - Place two Desktop Configurations (identical) into the Compound Run Configuration
 - Click 'Run' with Coverage (two buttons left of standard Run button)
+
+------------------
+
+##Todo for server stuff
+- Wait to display gamescreen until after 2 clients connected
+- Assign clients player1 and player2, create the PlayerBody based on that
+- store positions of all objects and players on Server.java and index.js
