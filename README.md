@@ -29,7 +29,7 @@ Running two instances of the same class (intelliJ)
 
 ------------------
 
-##Todo for server stuff
+#### Todo for server stuff
 - Wait to display gamescreen until after 2 clients connected
 - Assign clients player1 and player2, create the PlayerBody based on that
 - store positions of all objects and players on Server.java and index.js
