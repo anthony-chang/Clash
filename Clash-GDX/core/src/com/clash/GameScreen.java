@@ -9,13 +9,20 @@ import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Quaternion;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
-import com.badlogic.gdx.physics.box2d.Body;
-import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
-import com.badlogic.gdx.physics.box2d.World;
+import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
+import com.badlogic.gdx.Gdx;
 import com.clash.server.Server;
+import io.socket.client.IO;
+import io.socket.client.Socket;
+import io.socket.emitter.Emitter;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.HashMap;
 
 public class GameScreen implements Screen {
     /**Settings stuff**/
@@ -88,14 +95,14 @@ public class GameScreen implements Screen {
         p1 = new PlayerBody(1);
         p1.addPlayerToWorld(world);
         p2 = new PlayerBody(2);
-        p2.addPlayerToWorld(world);
+        //p2.addPlayerToWorld(world);
         border = new Wall(WIDTH, HEIGHT);
         border.addWallWorld(world);
 
         /** Server code**/
-        //server = new Server(world, p1, p2);
-        //server.connectSocket();
-        //server.configSocketEvents();
+        server = new Server(world, p1, p2);
+        server.connectSocket();
+        server.configSocketEvents();
         /**End of Server code**/
 
         //create the map using the JSON files
@@ -243,7 +250,9 @@ public class GameScreen implements Screen {
         players.setProjectionMatrix(viewCamera.combined);
         players.begin();
         p1.draw(players);
-        p2.draw(players);
+        if(p2_connected) {
+            p2.draw(players);
+        }
         players.end();
 
         /**Update player characteristics**/
