@@ -16,11 +16,15 @@ public class Server {
 
     Socket socket;
 
+    // other variables
+    int total_players;
+
     public Server(World world, PlayerBody p1, PlayerBody p2) {
         this.world = world;
         this.p1 = p1;
         this.p2 = p2;
     }
+
     public void connectSocket(){
         try{
             socket = IO.socket("http://localhost:8080");
@@ -56,11 +60,22 @@ public class Server {
                 try {
                     String id = data.getString("id");
                     Gdx.app.log("SocketIO","New Player Connect: " + id);
-                    p2.addPlayerToWorld(world);
-                    GameScreen.p2_connected = true; //TODO reimplement later
+
                 }
                 catch (JSONException e){
                     Gdx.app.log("SocketIO","Error getting New PlayerID");
+                }
+            }
+        }).on("countPlayers", new Emitter.Listener() {
+            @Override
+            public void call(Object... args) {
+                JSONObject data = (JSONObject) args[0];
+                try {
+                    total_players = data.getInt("total_players");
+                    Gdx.app.log("SocketIO", "Total players connected: " + total_players);
+                }
+                catch (JSONException e){
+                    Gdx.app.log("SocketIO","Error getting total number of players");
                 }
             }
         }).on("playerDisconnected", new Emitter.Listener() {
@@ -69,12 +84,16 @@ public class Server {
                 JSONObject data = (JSONObject) args[0];
                 try {
                     String id = data.getString("id");
-                    world.destroyBody(p2.playerBody);
                 }
                 catch (JSONException e){
                     Gdx.app.log("SocketIO","Error getting disconnected PlayerID");
                 }
             }
         });
+    }
+
+    // gives the number of players in the server
+    public int getTotalPlayers() {
+        return total_players;
     }
 }

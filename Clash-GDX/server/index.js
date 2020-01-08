@@ -11,7 +11,7 @@ io.on('connection', function(socket){
     console.log("Player connected!");
 
     // socketID Event
-    socket.emit ('socketID', { id: socket.id }); // sends client's own ID to client
+    socket.emit ('socketID', { id: socket.id }); // sends client's own ID to own client
 
     // newPlayer Event
     socket.broadcast.emit ('newPlayer', { id: socket.id }); // sends client's own ID to all other clients
@@ -31,7 +31,12 @@ io.on('connection', function(socket){
             }
         }
     });
+
     players.push(new player(socket.id, 0, 0, 6));
+
+    // countPlayers Event
+    io.sockets.emit('countPlayers', { total_players: players.length }); // sends the number of players on the server
+
 });
 
 function player (id, x, y, health){
