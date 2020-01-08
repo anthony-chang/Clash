@@ -164,7 +164,7 @@ public class MultiplayerDemo extends ApplicationAdapter {
 					}
 				}
 				catch(JSONException e){
-					Gdx.app.log("SocketIO","Error getting disconnected PlayerID");
+					Gdx.app.log("SocketIO","Error getting playerMoved data");
 				}
 			}
 		}).on("getPlayers", new Emitter.Listener() {
