@@ -16,11 +16,32 @@ io.on('connection', function(socket){
     // newPlayer Event
     socket.broadcast.emit ('newPlayer', { id: socket.id }); // sends client's own ID to all other clients
 
+    // playerMoved Event
+    socket.on('playerMoved', function(data){
+        data.id = socket.id;
+        socket.broadcast.emit('playerMoved', data);
+        console.log("playerMoved: " + data.id);
+
+        /**
+        console.log("playerMoved: " + "ID: " + data.id
+            + "X: " + data.x
+            + "Y: " + data.y);
+
+        for (var i = 0; i < players.length; i++){
+            if (players[i].id === data.id){
+                players[i].x = data.x;
+                players[i].y = data.y;
+            }
+        }
+         **/
+    });
+
     socket.on('disconnect', function(){
         console.log("Player disconnected");
 
         // playerDisconnected Event
-        socket.broadcast.emit('playerDisconnected', { id: socket.id }); // sends client's own ID to all other clients
+        // sends client's own ID to all other clients
+        socket.broadcast.emit('playerDisconnected', { id: socket.id });
 
         for (var i = 0; i < players.length; i++){
             if (players[i].id == socket.id){

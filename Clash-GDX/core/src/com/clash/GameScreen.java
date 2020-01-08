@@ -246,6 +246,9 @@ public class GameScreen implements Screen {
                     bulletHeight);
         hud.end();
 
+        /**Server Code**/
+        server.updateServer();
+
         /**Render the players and their health bars**/
         players.setProjectionMatrix(viewCamera.combined);
         players.begin();

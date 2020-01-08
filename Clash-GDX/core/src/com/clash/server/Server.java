@@ -37,6 +37,20 @@ public class Server {
         }
     }
 
+    public void updateServer(){
+        JSONObject data = new JSONObject();
+        /**
+        try{
+            data.put("x", player.getX());
+            data.put("y", player.getY());
+            socket.emit("playerMoved", data);
+        }
+        catch (JSONException e){
+            Gdx.app.log("SocketIO", "Error sending update data");
+        }
+         **/
+    }
+
     public void configSocketEvents(){
         socket.on(Socket.EVENT_CONNECT, new Emitter.Listener() {
             @Override
@@ -104,6 +118,24 @@ public class Server {
                 catch (JSONException e){
                     Gdx.app.log("SocketIO","Error getting disconnected PlayerID");
                 }
+            }
+        }).on("playerMoved", new Emitter.Listener() {
+            @Override
+            public void call(Object... args) {
+                JSONObject data = (JSONObject) args[0];
+                /**
+                try{
+                    String playerID = data.getString("id");
+                    Double x = data.getDouble("x");
+                    Double y = data.getDouble("y");
+                    if (friendlyPlayers.get(playerID) != null){
+                        friendlyPlayers.get(playerID).setPosition(x.floatValue(), y.floatValue());
+                    }
+                }
+                catch(JSONException e){
+                    Gdx.app.log("SocketIO","Error getting playerMoved data");
+                }
+                 **/
             }
         });
     }
