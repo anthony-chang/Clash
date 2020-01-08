@@ -16,9 +16,6 @@ io.on('connection', function(socket){
     // newPlayer Event
     socket.broadcast.emit ('newPlayer', { id: socket.id }); // sends client's own ID to all other clients
 
-    // getPlayers Event
-    //socket.emit ('getPlayers', players); // sends the players array
-
     socket.on('disconnect', function(){
         console.log("Player disconnected");
 
@@ -28,6 +25,10 @@ io.on('connection', function(socket){
         for (var i = 0; i < players.length; i++){
             if (players[i].id == socket.id){
                 players.splice(i,1);
+
+                // countPlayers Event
+                // sends the number of players on the server to all clients
+                io.sockets.emit('countPlayers', { total_players: players.length });
             }
         }
     });
@@ -35,7 +36,13 @@ io.on('connection', function(socket){
     players.push(new player(socket.id, 0, 0, 6));
 
     // countPlayers Event
-    io.sockets.emit('countPlayers', { total_players: players.length }); // sends the number of players on the server
+    // sends the number of players on the server to all clients
+    io.sockets.emit('countPlayers', { total_players: players.length });
+
+    // simpleID Event
+    // sends the client's simpleID to own client (1 or 2)
+    // Warning: bug when p1 disconnects and a new player connects (Fix later)
+    socket.emit('simpleID', { simpleID: players.length });
 
 });
 

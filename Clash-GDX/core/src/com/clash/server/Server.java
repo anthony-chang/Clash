@@ -18,6 +18,8 @@ public class Server {
 
     // other variables
     int total_players;
+    int simpleID;
+    String socketID;
 
     public Server(World world, PlayerBody p1, PlayerBody p2) {
         this.world = world;
@@ -47,6 +49,7 @@ public class Server {
                 JSONObject data = (JSONObject) args[0];
                 try {
                     String id = data.getString("id");
+                    socketID = id;
                     Gdx.app.log("SocketIO","My id: " + id);
                 }
                 catch (JSONException e){
@@ -59,7 +62,7 @@ public class Server {
                 JSONObject data = (JSONObject) args[0];
                 try {
                     String id = data.getString("id");
-                    Gdx.app.log("SocketIO","New Player Connect: " + id);
+                    Gdx.app.log("SocketIO","New Player Connected: " + id);
 
                 }
                 catch (JSONException e){
@@ -78,12 +81,25 @@ public class Server {
                     Gdx.app.log("SocketIO","Error getting total number of players");
                 }
             }
+        }).on("simpleID", new Emitter.Listener() {
+            @Override
+            public void call(Object... args) {
+                JSONObject data = (JSONObject) args[0];
+                try {
+                    simpleID = data.getInt("simpleID");
+                    Gdx.app.log("SocketIO", "My simpleID: " + simpleID);
+                }
+                catch (JSONException e){
+                    Gdx.app.log("SocketIO","Error getting simpleID");
+                }
+            }
         }).on("playerDisconnected", new Emitter.Listener() {
             @Override
             public void call(Object... args) {
                 JSONObject data = (JSONObject) args[0];
                 try {
                     String id = data.getString("id");
+                    Gdx.app.log("SocketIO","Player Disconnected: " + id);
                 }
                 catch (JSONException e){
                     Gdx.app.log("SocketIO","Error getting disconnected PlayerID");
@@ -95,5 +111,15 @@ public class Server {
     // gives the number of players in the server
     public int getTotalPlayers() {
         return total_players;
+    }
+
+    // gives the client's simpleID
+    public int getSimpleID() {
+        return simpleID;
+    }
+
+    // gives the client's socketID
+    public String getSocketID() {
+        return socketID;
     }
 }
