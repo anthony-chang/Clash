@@ -93,6 +93,12 @@ public class PlayerBody {
             return 1;
         return curTime/RELOAD_TIME;
     }
+    public Vector2 getPosition() {
+        return playerBodyDef.position;
+    }
+    public Vector2 getVelocity() {
+        return playerBodyDef.linearVelocity;
+    }
     public void draw(SpriteBatch batch) {
         batch.draw(healthBar[health],
                 (float) (getPositionMetres().x - healthBar[health].getWidth()/10/2 * 1.1),
