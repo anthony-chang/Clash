@@ -32,4 +32,6 @@ Running two instances of the same class (intelliJ)
 #### Todo for server stuff
 - Wait to display gamescreen until after 2 clients connected
 - Assign clients player1 and player2, create the PlayerBody based on that
-- store positions of all objects and players on Server.java and index.js
+- store positions of  players on Server.java and index.js
+- run 2 seperate physics on the clients (hopefully they'll keep decently in sync)
+- bullet create call that relays postision and velocity vector of new bullets
