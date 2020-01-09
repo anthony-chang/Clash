@@ -39,19 +39,18 @@ public class Server {
 
     public void updateServer(){
         JSONObject data = new JSONObject();
-        // taken out of try catch
-        socket.emit("playerMoved", data);
 
-        /**
         try{
-            data.put("x", player.getX());
-            data.put("y", player.getY());
+            data.put("positionX", p1.getPositionX());
+            data.put("positionY", p1.getPositionY());
+            data.put("velocityX", p1.getVelocityX());
+            data.put("velocityY", p1.getVelocityY());
             socket.emit("playerMoved", data);
         }
         catch (JSONException e){
             Gdx.app.log("SocketIO", "Error sending update data");
         }
-         **/
+
     }
 
     public void configSocketEvents(){
@@ -126,6 +125,7 @@ public class Server {
             @Override
             public void call(Object... args) {
                 JSONObject data = (JSONObject) args[0];
+
                 /**
                 try{
                     String playerID = data.getString("id");

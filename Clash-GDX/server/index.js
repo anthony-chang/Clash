@@ -20,20 +20,21 @@ io.on('connection', function(socket){
     socket.on('playerMoved', function(data){
         data.id = socket.id;
         socket.broadcast.emit('playerMoved', data);
-        console.log("playerMoved: " + data.id);
 
-        /**
         console.log("playerMoved: " + "ID: " + data.id
-            + "X: " + data.x
-            + "Y: " + data.y);
+                                    + " positionX: " + data.positionX
+                                    + " positionY: " + data.positionY
+                                    + " velocityX: " + data.velocityX
+                                    + " velocityY: " + data.velocityY);
 
-        for (var i = 0; i < players.length; i++){
-            if (players[i].id === data.id){
-                players[i].x = data.x;
-                players[i].y = data.y;
+        for (var i = 0; i < players.length; i++) {
+            if (players[i].id === data.id) {
+                players[i].positionX = data.positionX;
+                players[i].positionY = data.positionY;
+                players[i].velocityX = data.velocityX;
+                players[i].velocityY = data.velocityY;
             }
         }
-         **/
     });
 
     socket.on('disconnect', function(){
@@ -67,9 +68,10 @@ io.on('connection', function(socket){
 
 });
 
-function player (id, x, y, health){
+function player (id, positionX, positionY, velocityX, velocityY){
     this.id = id;
-    this.x = x;
-    this.y = y;
-    this.health = health;
+    this.positionX = positionX;
+    this.positionY = positionY;
+    this.velocityX = velocityX;
+    this.velocityY = velocityY;
 }

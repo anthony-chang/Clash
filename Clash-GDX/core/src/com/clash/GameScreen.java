@@ -241,6 +241,8 @@ public class GameScreen implements Screen {
 
         /**Server Code**/
         server.updateServer();
+        // bug testing
+        System.out.println(p1.getPositionX() + ", " + p1.getPositionY());
 
         /**Render the players and their health bars**/
         players.setProjectionMatrix(viewCamera.combined);
