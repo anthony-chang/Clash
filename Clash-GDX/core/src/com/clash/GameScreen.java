@@ -45,7 +45,7 @@ public class GameScreen implements Screen {
     private Box2DDebugRenderer debugRenderer;
     private OrthographicCamera viewCamera;
     private Viewport viewPort;
-    private PlayerBody p1, p2;
+    private PlayerBody thisPlayer, opponentPlayer;
     private Wall border;
     private MapGenerator map;
 
@@ -83,20 +83,19 @@ public class GameScreen implements Screen {
             Matrix4 mat = new Matrix4(Vector3.Zero, rotateQuaternion, new Vector3(1f, 1f, 1f));
             calibrationMatrix = mat.inv(); //invert the matrix so it can be applied later
         }
-
-        /**Set up the objects in the world**/
-        p1 = new PlayerBody(1);
-        p1.addPlayerToWorld(world);
-        p2 = new PlayerBody(2);
-        //p2.addPlayerToWorld(world);
-        border = new Wall(WIDTH, HEIGHT);
-        border.addWallWorld(world);
-
         /** Server code**/
-        server = new Server(world, p1, p2);
+        server = new Server(world, thisPlayer, opponentPlayer);
         server.connectSocket();
         server.configSocketEvents();
         /**End of Server code**/
+
+        /**Set up the objects in the world**/
+        thisPlayer = new PlayerBody(1);
+        thisPlayer.addPlayerToWorld(world);
+        opponentPlayer = new PlayerBody(2);
+        //p2.addPlayerToWorld(world);
+        border = new Wall(WIDTH, HEIGHT);
+        border.addWallWorld(world);
 
         //create the map using the JSON files
         if (LevelMenu.getMap() == "Sieve"){
@@ -134,16 +133,16 @@ public class GameScreen implements Screen {
             public boolean keyDown(int keycode) {
                 switch (keycode) {
                     case Input.Keys.W:
-                        p1.move(0, 1);
+                        thisPlayer.move(0, 1);
                         break;
                     case Input.Keys.A:
-                        p1.move(-1, 0);
+                        thisPlayer.move(-1, 0);
                         break;
                     case Input.Keys.S:
-                        p1.move(0, -1);
+                        thisPlayer.move(0, -1);
                         break;
                     case Input.Keys.D:
-                        p1.move(1, 0);
+                        thisPlayer.move(1, 0);
                         break;
                 }
                 return false;
@@ -154,11 +153,11 @@ public class GameScreen implements Screen {
                 switch (keycode) {
                     case Input.Keys.W:
                     case Input.Keys.S:
-                        p1.movement.y = 0;
+                        thisPlayer.movement.y = 0;
                         break;
                     case Input.Keys.A:
                     case Input.Keys.D:
-                        p1.movement.x = 0;
+                        thisPlayer.movement.x = 0;
                         break;
                 }
                 return false;
@@ -171,17 +170,17 @@ public class GameScreen implements Screen {
 
             @Override
             public boolean touchDown(int screenX, int screenY, int pointer, int button) {
-                if(p1.ammo > 0) {
-                    --p1.ammo;
+                if(thisPlayer.ammo > 0) {
+                    --thisPlayer.ammo;
                     Bullet bullet;
                     if(AUTO_AIM) {
-                        bullet = new Bullet(1, p1.getPositionMetres().x, p1.getPositionMetres().y, p2.getPositionMetres().x, p2.getPositionMetres().y, AUTO_AIM);
+                        bullet = new Bullet(1, thisPlayer.getPositionX(), thisPlayer.getPositionY(), opponentPlayer.getPositionX(), opponentPlayer.getPositionY(), AUTO_AIM);
                     }
                     else {
                         //convert mouse (x, y) in pixels (with origin at top left) to (x, y) in metres (with origin at centre)
                         float x_metres = ((float) screenX) / ((float) Gdx.graphics.getWidth()) * WIDTH - WIDTH / 2f;
                         float y_metres = HEIGHT / 2f - ((float) screenY) / ((float) Gdx.graphics.getHeight()) * HEIGHT;
-                        bullet = new Bullet(1, p1.getPositionMetres().x, p1.getPositionMetres().y, x_metres, y_metres, AUTO_AIM);
+                        bullet = new Bullet(1, thisPlayer.getPositionX(), thisPlayer.getPositionY(), x_metres, y_metres, AUTO_AIM);
                     }
                     bullet.addBulletToWorld(world);
                 }
@@ -228,28 +227,28 @@ public class GameScreen implements Screen {
         hud.begin();
         //Ammo indicator
         int bulletWidth = bulletTexture.getWidth(), bulletHeight = bulletTexture.getHeight();
-        for(int i = 0; i < p1.ammo; ++i) { //draw the bullets images on the hud
+        for(int i = 0; i < thisPlayer.ammo; ++i) { //draw the bullets images on the hud
             hud.draw(bulletTexture, (int) (Gdx.graphics.getWidth() - (bulletWidth * 1.05)), i * bulletHeight);
         }
-        if(p1.ammo < p1.MAX_AMMO) //show part of a bullet for reload
-            hud.draw(bulletTexture, (int) (Gdx.graphics.getWidth() - (bulletWidth * 1.05)), p1.ammo * bulletHeight,
+        if(thisPlayer.ammo < thisPlayer.MAX_AMMO) //show part of a bullet for reload
+            hud.draw(bulletTexture, (int) (Gdx.graphics.getWidth() - (bulletWidth * 1.05)), thisPlayer.ammo * bulletHeight,
                     0,
                     0,
-                    (int) (bulletWidth*p1.getReloadPercentage()),
+                    (int) (bulletWidth* thisPlayer.getReloadPercentage()),
                     bulletHeight);
         hud.end();
 
         /**Server Code**/
         server.updateServer();
         // bug testing
-        System.out.println(p1.getPositionX() + ", " + p1.getPositionY());
+        System.out.println(thisPlayer.getPositionX() + ", " + thisPlayer.getPositionY());
 
         /**Render the players and their health bars**/
         players.setProjectionMatrix(viewCamera.combined);
         players.begin();
-        p1.draw(players);
+        thisPlayer.draw(players);
         if(p2_connected) {
-            p2.draw(players);
+            opponentPlayer.draw(players);
         }
         players.end();
 
@@ -257,18 +256,18 @@ public class GameScreen implements Screen {
         updateBodies(); //clear the screen of bullets that have collided with things, and update player health
 
         float deltaTime = Gdx.graphics.getRawDeltaTime();
-        p1.updateAmmo(deltaTime); //update the ammo of the players
-        p2.updateAmmo(deltaTime);
+        thisPlayer.updateAmmo(deltaTime); //update the ammo of the players
+        opponentPlayer.updateAmmo(deltaTime);
 
         if(accelerometerAvailable) { //mobile controls
             Vector2 temp = calibrateAccelerometerXYZ(Gdx.input.getAccelerometerX(), Gdx.input.getAccelerometerY(), Gdx.input.getAccelerometerZ());
-            p1.moveUsingAccelerometer(temp.x, temp.y);
+            thisPlayer.moveUsingAccelerometer(temp.x, temp.y);
         }
-        p1.playerBody.applyForceToCenter(p1.movement, true); //move the player
+        thisPlayer.playerBody.applyForceToCenter(thisPlayer.movement, true); //move the player
         world.step(TIMESTEP, VELOCITYITERATIONS, POSITIONITERATIONS); //simulate the physics
 
         /**Centre camera about player**/
-        viewCamera.position.set(p1.getPositionMetres().x, p1.getPositionMetres().y, 0);
+        viewCamera.position.set(thisPlayer.getPositionX(), thisPlayer.getPositionY(), 0);
         viewCamera.update();
 
         debugRenderer.render(world, viewCamera.combined); //TODO remove later
@@ -288,20 +287,20 @@ public class GameScreen implements Screen {
                     world.destroyBody(bodies.get(i));
                 }
                 else if (bodies.get(i).getUserData().equals("PLAYER1_DECREMENT_HEALTH")) { //flagged player 1 as hit
-                    --p1.health;
-                    p1.playerBody.setUserData("PLAYER1");
+                    --thisPlayer.health;
+                    thisPlayer.playerBody.setUserData("PLAYER1");
                 }
                 else if(bodies.get(i).getUserData().equals("PLAYER2_DECREMENT_HEALTH")) {//flagged player 2 as hit
-                    --p2.health;
-                    p2.playerBody.setUserData("PLAYER2");
+                    --opponentPlayer.health;
+                    opponentPlayer.playerBody.setUserData("PLAYER2");
                 }
 
-                if(p1.health == 0) {
+                if(thisPlayer.health == 0) {
                     System.out.println("Player 2 wins");
                     ((Game)Gdx.app.getApplicationListener()).setScreen(new LevelMenu());
                 }
 
-                else if(p2.health == 0) {
+                else if(opponentPlayer.health == 0) {
                     System.out.println("Player 1 wins");
                     ((Game)Gdx.app.getApplicationListener()).setScreen(new LevelMenu());
                 }
@@ -331,12 +330,12 @@ public class GameScreen implements Screen {
 
     @Override
     public void dispose() {
-        p1.playerShape.dispose();
-        for(Texture i:p1.healthBar)
+        thisPlayer.playerShape.dispose();
+        for(Texture i: thisPlayer.healthBar)
             i.dispose();
 
-        p2.playerShape.dispose();
-        for(Texture i:p2.healthBar)
+        opponentPlayer.playerShape.dispose();
+        for(Texture i: opponentPlayer.healthBar)
             i.dispose();
 
         bulletTexture.dispose();

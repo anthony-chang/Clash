@@ -65,9 +65,6 @@ public class PlayerBody {
         playerBody.setUserData((num == 1) ? "PLAYER1":"PLAYER2");
         playerBody.createFixture(playerFixtureDef);
     }
-    public Vector2 getPositionMetres() { //get the player's position in metres, centred about centre
-        return playerBody.getPosition();
-    }
     public void move(int x, int y) {
         if(x != 0)
             movement.x = (x < 0) ? -speed:speed; //left:right
@@ -95,27 +92,27 @@ public class PlayerBody {
     }
 
     public float getPositionX() {
-        return playerBodyDef.position.x;
+        return playerBody.getPosition().x;
     }
     public float getPositionY() {
-        return playerBodyDef.position.y;
+        return playerBody.getPosition().y;
     }
     public float getVelocityX() {
-        return playerBodyDef.linearVelocity.x;
+        return playerBody.getLinearVelocity().x;
     }
     public float getVelocityY() {
-        return playerBodyDef.linearVelocity.y;
+        return playerBody.getLinearVelocity().y;
     }
 
     public void draw(SpriteBatch batch) {
         batch.draw(healthBar[health],
-                (float) (getPositionMetres().x - healthBar[health].getWidth()/10/2 * 1.1),
-                getPositionMetres().y + healthBar[health].getHeight()/10,
+                (float) (getPositionX() - healthBar[health].getWidth()/10/2 * 1.1),
+                getPositionY() + healthBar[health].getHeight()/10,
                 healthBar[health].getWidth()/10,
                 healthBar[health].getHeight()/10);
         batch.draw(playerTexture,
-                getPositionMetres().x - 3,
-                getPositionMetres().y - 3,
+                getPositionX() - 3,
+                getPositionY() - 3,
                 6,
                 6);
     }
