@@ -59,6 +59,7 @@ public class GameScreen implements Screen {
 
     /**Server Variables**/
     Server server;
+    private int ID; //1 or 2
     public static boolean p2_connected = false;
 
     @Override
@@ -84,16 +85,24 @@ public class GameScreen implements Screen {
             calibrationMatrix = mat.inv(); //invert the matrix so it can be applied later
         }
         /** Server code**/
-        server = new Server(world, thisPlayer, opponentPlayer);
+        server = new Server(thisPlayer);
         server.connectSocket();
         server.configSocketEvents();
+        while(server.getTotalPlayers() < 2){
+            System.out.println("Waiting for player to connect");
+        }  //wait for 2 players to connect to start
+        do {
+            ID = server.getSimpleID();
+            System.out.println("My ID is: " + ID);
+        } while(ID != 1 && ID != 2);
+
         /**End of Server code**/
 
         /**Set up the objects in the world**/
-        thisPlayer = new PlayerBody(1);
+        thisPlayer = new PlayerBody(ID);
         thisPlayer.addPlayerToWorld(world);
-        opponentPlayer = new PlayerBody(2);
-        //p2.addPlayerToWorld(world);
+        opponentPlayer = new PlayerBody((ID == 1) ? 2:1);
+        opponentPlayer.addPlayerToWorld(world);
         border = new Wall(WIDTH, HEIGHT);
         border.addWallWorld(world);
 
@@ -174,24 +183,16 @@ public class GameScreen implements Screen {
                     --thisPlayer.ammo;
                     Bullet bullet;
                     if(AUTO_AIM) {
-                        bullet = new Bullet(1, thisPlayer.getPositionX(), thisPlayer.getPositionY(), opponentPlayer.getPositionX(), opponentPlayer.getPositionY(), AUTO_AIM);
+                        bullet = new Bullet(ID, thisPlayer.getPositionX(), thisPlayer.getPositionY(), opponentPlayer.getPositionX(), opponentPlayer.getPositionY(), AUTO_AIM);
                     }
                     else {
                         //convert mouse (x, y) in pixels (with origin at top left) to (x, y) in metres (with origin at centre)
                         float x_metres = ((float) screenX) / ((float) Gdx.graphics.getWidth()) * WIDTH - WIDTH / 2f;
                         float y_metres = HEIGHT / 2f - ((float) screenY) / ((float) Gdx.graphics.getHeight()) * HEIGHT;
-                        bullet = new Bullet(1, thisPlayer.getPositionX(), thisPlayer.getPositionY(), x_metres, y_metres, AUTO_AIM);
+                        bullet = new Bullet(ID, thisPlayer.getPositionX(), thisPlayer.getPositionY(), x_metres, y_metres, AUTO_AIM);
                     }
                     bullet.addBulletToWorld(world);
                 }
-                /**Testing Player 2 bullets**/ //TODO remove later
-                //p2 just fires when p1 fires
-                //auto aim at player 1
-                /*if(p2.ammo > 0) {
-                    --p2.ammo;
-                    Bullet bullet2 = new Bullet(2, p2.getPositionMetres().x, p2.getPositionMetres().y, p1.getPositionMetres().x, p1.getPositionMetres().y, true);
-                    bullet2.addBulletToWorld(world);
-                }*/
                 return false;
             }
 
@@ -239,17 +240,18 @@ public class GameScreen implements Screen {
         hud.end();
 
         /**Server Code**/
-        server.updateServer();
+        try {
+            server.updateServer();
+        } catch (Exception e) {
+        }
         // bug testing
-        System.out.println(thisPlayer.getPositionX() + ", " + thisPlayer.getPositionY());
+        //System.out.println(thisPlayer.getPositionX() + ", " + thisPlayer.getPositionY());
 
         /**Render the players and their health bars**/
         players.setProjectionMatrix(viewCamera.combined);
         players.begin();
         thisPlayer.draw(players);
-        if(p2_connected) {
-            opponentPlayer.draw(players);
-        }
+        opponentPlayer.draw(players);
         players.end();
 
         /**Update player characteristics**/
@@ -287,12 +289,22 @@ public class GameScreen implements Screen {
                     world.destroyBody(bodies.get(i));
                 }
                 else if (bodies.get(i).getUserData().equals("PLAYER1_DECREMENT_HEALTH")) { //flagged player 1 as hit
-                    --thisPlayer.health;
-                    thisPlayer.playerBody.setUserData("PLAYER1");
+                    if(ID == 1) {
+                        --thisPlayer.health;
+                        thisPlayer.playerBody.setUserData("PLAYER1");
+                    } else if (ID == 2) {
+                        --opponentPlayer.health;
+                        opponentPlayer.playerBody.setUserData("PLAYER1");
+                    }
                 }
                 else if(bodies.get(i).getUserData().equals("PLAYER2_DECREMENT_HEALTH")) {//flagged player 2 as hit
-                    --opponentPlayer.health;
-                    opponentPlayer.playerBody.setUserData("PLAYER2");
+                    if(ID == 2) {
+                        --thisPlayer.health;
+                        thisPlayer.playerBody.setUserData("PLAYER2");
+                    } else if (ID == 1) {
+                        --opponentPlayer.health;
+                        opponentPlayer.playerBody.setUserData("PLAYER2");
+                    }
                 }
 
                 if(thisPlayer.health == 0) {

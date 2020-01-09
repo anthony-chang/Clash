@@ -1,8 +1,6 @@
 package com.clash.server;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.physics.box2d.World;
-import com.clash.GameScreen;
 import com.clash.PlayerBody;
 import io.socket.client.IO;
 import io.socket.client.Socket;
@@ -11,8 +9,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 public class Server {
-    World world;
-    PlayerBody p1, p2;
+    PlayerBody thisPlayer, opponentPlayer;
 
     Socket socket;
 
@@ -21,10 +18,8 @@ public class Server {
     int simpleID;
     String socketID;
 
-    public Server(World world, PlayerBody p1, PlayerBody p2) {
-        this.world = world;
-        this.p1 = p1;
-        this.p2 = p2;
+    public Server(PlayerBody p) {
+        thisPlayer = p;
     }
 
     public void connectSocket(){
@@ -39,12 +34,11 @@ public class Server {
 
     public void updateServer(){
         JSONObject data = new JSONObject();
-
         try{
-            data.put("positionX", p1.getPositionX());
-            data.put("positionY", p1.getPositionY());
-            data.put("velocityX", p1.getVelocityX());
-            data.put("velocityY", p1.getVelocityY());
+            data.put("positionX", thisPlayer.getPositionX());
+            data.put("positionY", thisPlayer.getPositionY());
+            data.put("velocityX", thisPlayer.getVelocityX());
+            data.put("velocityY", thisPlayer.getVelocityY());
             socket.emit("playerMoved", data);
         }
         catch (JSONException e){
