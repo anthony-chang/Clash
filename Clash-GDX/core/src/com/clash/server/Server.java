@@ -20,8 +20,8 @@ public class Server {
     String socketID;
 
     // position and velocity of other player
-    Vector2 opponent_position = new Vector2();
-    Vector2 opponent_velocity = new Vector2();
+    public Vector2 opponent_position = new Vector2();
+    public Vector2 opponent_velocity = new Vector2();
 
     public Server(PlayerBody p) {
         thisPlayer = p;
@@ -122,7 +122,7 @@ public class Server {
                     opponent_velocity.y = velocityY.floatValue();
 
                     // print to console
-                    System.out.println ("opponent_pos: " + opponent_position.x + " " + opponent_position.y);
+                    //System.out.println ("opponent_pos: " + opponent_position.x + " " + opponent_position.y);
                 }
                 catch(JSONException e){
                     Gdx.app.log("SocketIO","Error getting playerMoved data");

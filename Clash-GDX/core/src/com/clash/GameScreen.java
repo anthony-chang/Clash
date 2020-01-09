@@ -274,13 +274,13 @@ public class GameScreen implements Screen {
 
         float deltaTime = Gdx.graphics.getRawDeltaTime();
         thisPlayer.updateAmmo(deltaTime); //update the ammo of the players
-        opponentPlayer.updateAmmo(deltaTime);
 
         if(accelerometerAvailable) { //mobile controls
             Vector2 temp = calibrateAccelerometerXYZ(Gdx.input.getAccelerometerX(), Gdx.input.getAccelerometerY(), Gdx.input.getAccelerometerZ());
             thisPlayer.moveUsingAccelerometer(temp.x, temp.y);
         }
         thisPlayer.playerBody.applyForceToCenter(thisPlayer.movement, true); //move the player
+        opponentPlayer.playerBody.applyLinearImpulse(server.opponent_velocity.x, server.opponent_velocity.y, opponentPlayer.getPositionX(), opponentPlayer.getPositionY(), true);
         world.step(TIMESTEP, VELOCITYITERATIONS, POSITIONITERATIONS); //simulate the physics
 
         /**Centre camera about player**/
