@@ -7,6 +7,7 @@ import io.socket.client.Socket;
 import io.socket.emitter.Emitter;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.badlogic.gdx.math.Vector2;
 
 public class Server {
     PlayerBody thisPlayer, opponentPlayer;
@@ -17,6 +18,10 @@ public class Server {
     int total_players;
     int simpleID;
     String socketID;
+
+    // position and velocity of other player
+    Vector2 opponent_position = new Vector2();
+    Vector2 opponent_velocity = new Vector2();
 
     public Server(PlayerBody p) {
         thisPlayer = p;
@@ -105,19 +110,24 @@ public class Server {
             public void call(Object... args) {
                 JSONObject data = (JSONObject) args[0];
 
-                /**
                 try{
-                    String playerID = data.getString("id");
-                    Double x = data.getDouble("x");
-                    Double y = data.getDouble("y");
-                    if (friendlyPlayers.get(playerID) != null){
-                        friendlyPlayers.get(playerID).setPosition(x.floatValue(), y.floatValue());
-                    }
+                    Double positionX = data.getDouble("positionX");
+                    Double positionY = data.getDouble("positionY");
+                    Double velocityX = data.getDouble("velocityX");
+                    Double velocityY = data.getDouble("velocityY");
+
+                    opponent_position.x = positionX.floatValue();
+                    opponent_position.y = positionY.floatValue();
+                    opponent_velocity.x = velocityX.floatValue();
+                    opponent_velocity.y = velocityY.floatValue();
+
+                    // print to console
+                    System.out.println ("opponent_pos: " + opponent_position.x + " " + opponent_position.y);
                 }
                 catch(JSONException e){
                     Gdx.app.log("SocketIO","Error getting playerMoved data");
                 }
-                 **/
+
             }
         });
     }

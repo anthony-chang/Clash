@@ -244,7 +244,7 @@ public class GameScreen implements Screen {
 
         /**Server Code**/
         // Updating server here
-        
+
         JSONObject data = new JSONObject();
 
         try{

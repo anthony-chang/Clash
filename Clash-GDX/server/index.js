@@ -21,11 +21,14 @@ io.on('connection', function(socket){
         data.id = socket.id;
         socket.broadcast.emit('playerMoved', data);
 
+        /**
+         * uncomment for testing purposes
         console.log("playerMoved: " + "ID: " + data.id
                                     + " positionX: " + data.positionX
                                     + " positionY: " + data.positionY
                                     + " velocityX: " + data.velocityX
                                     + " velocityY: " + data.velocityY);
+        **/
 
         for (var i = 0; i < players.length; i++) {
             if (players[i].id === data.id) {
