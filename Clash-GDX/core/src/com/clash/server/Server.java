@@ -39,6 +39,9 @@ public class Server {
 
     public void updateServer(){
         JSONObject data = new JSONObject();
+        // taken out of try catch
+        socket.emit("playerMoved", data);
+
         /**
         try{
             data.put("x", player.getX());
