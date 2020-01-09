@@ -32,21 +32,6 @@ public class Server {
         }
     }
 
-    public void updateServer(){
-        JSONObject data = new JSONObject();
-        try{
-            data.put("positionX", thisPlayer.getPositionX());
-            data.put("positionY", thisPlayer.getPositionY());
-            data.put("velocityX", thisPlayer.getVelocityX());
-            data.put("velocityY", thisPlayer.getVelocityY());
-            socket.emit("playerMoved", data);
-        }
-        catch (JSONException e){
-            Gdx.app.log("SocketIO", "Error sending update data");
-        }
-
-    }
-
     public void configSocketEvents(){
         socket.on(Socket.EVENT_CONNECT, new Emitter.Listener() {
             @Override
@@ -150,5 +135,9 @@ public class Server {
     // gives the client's socketID
     public String getSocketID() {
         return socketID;
+    }
+
+    public Socket getSocket(){
+        return socket;
     }
 }

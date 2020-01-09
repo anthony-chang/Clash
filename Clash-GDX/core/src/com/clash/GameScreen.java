@@ -16,6 +16,8 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.clash.server.Server;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 public class GameScreen implements Screen {
     /**Settings stuff**/
@@ -239,13 +241,26 @@ public class GameScreen implements Screen {
                     bulletHeight);
         hud.end();
 
+
         /**Server Code**/
-        try {
-            server.updateServer();
-        } catch (Exception e) {
+        // Updating server here
+        
+        JSONObject data = new JSONObject();
+
+        try{
+            data.put("positionX", thisPlayer.getPositionX());
+            data.put("positionY", thisPlayer.getPositionY());
+            data.put("velocityX", thisPlayer.getVelocityX());
+            data.put("velocityY", thisPlayer.getVelocityY());
+            server.getSocket().emit("playerMoved", data);
         }
-        // bug testing
-        //System.out.println(thisPlayer.getPositionX() + ", " + thisPlayer.getPositionY());
+        catch (JSONException e){
+            Gdx.app.log("SocketIO", "Error sending update data");
+        }
+        catch (java.lang.NullPointerException exception){
+            Gdx.app.log("SocketIO","Error sending update data");
+        }
+
 
         /**Render the players and their health bars**/
         players.setProjectionMatrix(viewCamera.combined);
