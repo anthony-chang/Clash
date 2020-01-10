@@ -24,6 +24,16 @@ public class Server {
     public Vector2 opponent_movement = new Vector2();
     public int opponent_health;
 
+    // bullet of other player
+    public int bullet_ID;
+    public float bullet_sourceX;
+    public float bullet_sourceY;
+    public float bullet_targetX;
+    public float bullet_targetY;
+    public boolean bullet_AUTO_AIM;
+
+
+
     public Server(PlayerBody p) {
         thisPlayer = p;
     }
@@ -134,6 +144,38 @@ public class Server {
                 }
                 catch(JSONException e){
                     Gdx.app.log("SocketIO","Error getting playerMoved data");
+                }
+
+            }
+        }).on("bulletShot", new Emitter.Listener() {
+            @Override
+            public void call(Object... args) {
+                JSONObject data = (JSONObject) args[0];
+
+                try{
+                    // movement
+                    bullet_ID = data.getInt("ID");
+                    double bullet_sourceX_0 = data.getDouble("thisPlayerPositionX");
+                    double bullet_sourceY_0 = data.getDouble("thisPlayerPositionY");
+                    double bullet_targetX_0 = data.getDouble("opponentPlayerPositionX");
+                    double bullet_targetY_0 = data.getDouble("opponentPlayerPositionY");
+                    bullet_AUTO_AIM = data.getBoolean("AUTO_AIM");
+
+                    // convert to float
+                    bullet_sourceX = (float) bullet_sourceX_0;
+                    bullet_sourceY = (float) bullet_sourceY_0;
+                    bullet_targetX = (float) bullet_targetX_0;
+                    bullet_targetY = (float) bullet_targetY_0;
+
+                    // print to console
+                    //System.out.println("opponent_health: " + opponent_health);
+                    //System.out.println ("opponent_pos: " + opponent_position.x + " " + opponent_position.y);
+                    System.out.println(bullet_sourceX + ", " + bullet_sourceY);
+                    System.out.println(bullet_targetX + ", " + bullet_targetY);
+                    System.out.println("--------------------------------------");
+                }
+                catch(JSONException e){
+                    Gdx.app.log("SocketIO","Error getting bulletShot data");
                 }
 
             }

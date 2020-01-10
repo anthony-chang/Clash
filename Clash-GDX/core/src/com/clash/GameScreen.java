@@ -184,14 +184,68 @@ public class GameScreen implements Screen {
                 if(thisPlayer.ammo > 0) {
                     --thisPlayer.ammo;
                     Bullet bullet;
+
+                    /**Server code for bullet**/
+                    JSONObject bullet_data = new JSONObject();
+
                     if(AUTO_AIM) {
                         bullet = new Bullet(ID, thisPlayer.getPositionX(), thisPlayer.getPositionY(), opponentPlayer.getPositionX(), opponentPlayer.getPositionY(), AUTO_AIM);
+
+
+                        /**Server code for bullet**/
+
+                        // Records bullet data
+
+                        try{
+                            // bullet data
+                            bullet_data.put("ID", ID);
+                            bullet_data.put("thisPlayerPositionX", thisPlayer.getPositionX());
+                            bullet_data.put("thisPlayerPositionY", thisPlayer.getPositionY());
+                            bullet_data.put("opponentPlayerPositionX", opponentPlayer.getPositionX());
+                            bullet_data.put("opponentPlayerPositionY", opponentPlayer.getPositionY());
+                            bullet_data.put("AUTO_AIM", AUTO_AIM);
+
+                            server.getSocket().emit("bulletShot", bullet_data);
+                        }
+                        catch (JSONException e){
+                            Gdx.app.log("SocketIO", "Error sending bullet update data");
+                        }
+                        catch (java.lang.NullPointerException exception){
+                            Gdx.app.log("SocketIO","Error sending bullet update data");
+                        }
+
+
                     }
                     else {
                         //convert mouse (x, y) in pixels (with origin at top left) to (x, y) in metres (with origin at centre)
                         float x_metres = ((float) screenX) / ((float) Gdx.graphics.getWidth()) * WIDTH - WIDTH / 2f;
                         float y_metres = HEIGHT / 2f - ((float) screenY) / ((float) Gdx.graphics.getHeight()) * HEIGHT;
                         bullet = new Bullet(ID, thisPlayer.getPositionX(), thisPlayer.getPositionY(), x_metres, y_metres, AUTO_AIM);
+
+
+                        /**Server code for bullet**/
+
+                        // Records bullet data
+
+                        try{
+                            // bullet data
+                            bullet_data.put("ID", ID);
+                            bullet_data.put("thisPlayerPositionX", thisPlayer.getPositionX());
+                            bullet_data.put("thisPlayerPositionY", thisPlayer.getPositionY());
+                            bullet_data.put("opponentPlayerPositionX", x_metres);
+                            bullet_data.put("opponentPlayerPositionY", y_metres);
+                            bullet_data.put("AUTO_AIM", AUTO_AIM);
+
+                            server.getSocket().emit("bulletShot", bullet_data);
+                        }
+                        catch (JSONException e){
+                            Gdx.app.log("SocketIO", "Error sending bullet update data");
+                        }
+                        catch (java.lang.NullPointerException exception){
+                            Gdx.app.log("SocketIO","Error sending bullet update data");
+                        }
+
+
                     }
                     bullet.addBulletToWorld(world);
                 }
@@ -259,7 +313,7 @@ public class GameScreen implements Screen {
             data.put("health", thisPlayer.getHealth());
 
             // print to console
-            System.out.println("my health: " + thisPlayer.getHealth());
+            //System.out.println("my health: " + thisPlayer.getHealth());
 
             server.getSocket().emit("playerMoved", data);
         }

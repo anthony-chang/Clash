@@ -2,6 +2,7 @@ var app = require('express')();
 var server = require('http').Server(app);
 var io = require('socket.io')(server);
 var players = [];
+var bullets = [];
 
 server.listen(8080, function(){
     console.log("Server is now running...");
@@ -15,6 +16,11 @@ io.on('connection', function(socket){
 
     // newPlayer Event
     socket.broadcast.emit ('newPlayer', { id: socket.id }); // sends client's own ID to all other clients
+
+    // bulletShot Event
+    socket.on('bulletShot', function(data){
+        socket.broadcast.emit('bulletShot', data);
+    });
 
     // playerMoved Event
     socket.on('playerMoved', function(data){
@@ -30,6 +36,7 @@ io.on('connection', function(socket){
                                     + " movementY: " + data.movementY);
         **/
 
+        // update players
         for (var i = 0; i < players.length; i++) {
             if (players[i].id === data.id) {
                 players[i].positionX = data.positionX;
@@ -39,6 +46,7 @@ io.on('connection', function(socket){
                 players[i].health = data.health;
             }
         }
+
     });
 
     socket.on('disconnect', function(){
