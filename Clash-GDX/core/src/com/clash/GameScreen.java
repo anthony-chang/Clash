@@ -246,10 +246,18 @@ public class GameScreen implements Screen {
         // Updating server here
         JSONObject data = new JSONObject();
         try{
+            // movement data
             data.put("positionX", thisPlayer.getPositionX());
             data.put("positionY", thisPlayer.getPositionY());
             data.put("velocityX", thisPlayer.getMovementX());
             data.put("velocityY", thisPlayer.getMovementY());
+
+            // health data
+            data.put("health", thisPlayer.getHealth());
+
+            // print to console
+            System.out.println("my health: " + thisPlayer.getHealth());
+
             server.getSocket().emit("playerMoved", data);
         }
         catch (JSONException e){

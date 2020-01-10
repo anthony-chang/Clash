@@ -103,6 +103,9 @@ public class PlayerBody {
     public float getMovementY() {
         return movement.y;
     }
+    public int getHealth() {
+        return health;
+    }
 
     public void draw(SpriteBatch batch) {
         batch.draw(healthBar[health],

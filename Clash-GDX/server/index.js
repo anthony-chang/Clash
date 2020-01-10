@@ -26,16 +26,17 @@ io.on('connection', function(socket){
         console.log("playerMoved: " + "ID: " + data.id
                                     + " positionX: " + data.positionX
                                     + " positionY: " + data.positionY
-                                    + " velocityX: " + data.velocityX
-                                    + " velocityY: " + data.velocityY);
+                                    + " movementX: " + data.movementX
+                                    + " movementY: " + data.movementY);
         **/
 
         for (var i = 0; i < players.length; i++) {
             if (players[i].id === data.id) {
                 players[i].positionX = data.positionX;
                 players[i].positionY = data.positionY;
-                players[i].velocityX = data.velocityX;
-                players[i].velocityY = data.velocityY;
+                players[i].movementX = data.movementX;
+                players[i].movementY = data.movementY;
+                players[i].health = data.health;
             }
         }
     });
@@ -71,10 +72,11 @@ io.on('connection', function(socket){
 
 });
 
-function player (id, positionX, positionY, velocityX, velocityY){
+function player (id, positionX, positionY, movementX, movementY, health){
     this.id = id;
     this.positionX = positionX;
     this.positionY = positionY;
-    this.velocityX = velocityX;
-    this.velocityY = velocityY;
+    this.movementX = movementX;
+    this.movementY = movementY;
+    this.health = health;
 }
