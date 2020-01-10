@@ -31,8 +31,7 @@ public class Server {
     public float bullet_targetX;
     public float bullet_targetY;
     public boolean bullet_AUTO_AIM;
-
-
+    public boolean newBullet = false;
 
     public Server(PlayerBody p) {
         thisPlayer = p;
@@ -151,7 +150,7 @@ public class Server {
             @Override
             public void call(Object... args) {
                 JSONObject data = (JSONObject) args[0];
-
+                newBullet = true;
                 try{
                     // movement
                     bullet_ID = data.getInt("ID");

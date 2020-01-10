@@ -190,12 +190,8 @@ public class GameScreen implements Screen {
 
                     if(AUTO_AIM) {
                         bullet = new Bullet(ID, thisPlayer.getPositionX(), thisPlayer.getPositionY(), opponentPlayer.getPositionX(), opponentPlayer.getPositionY(), AUTO_AIM);
-
-
                         /**Server code for bullet**/
-
                         // Records bullet data
-
                         try{
                             // bullet data
                             bullet_data.put("ID", ID);
@@ -213,8 +209,6 @@ public class GameScreen implements Screen {
                         catch (java.lang.NullPointerException exception){
                             Gdx.app.log("SocketIO","Error sending bullet update data");
                         }
-
-
                     }
                     else {
                         //convert mouse (x, y) in pixels (with origin at top left) to (x, y) in metres (with origin at centre)
@@ -222,11 +216,8 @@ public class GameScreen implements Screen {
                         float y_metres = HEIGHT / 2f - ((float) screenY) / ((float) Gdx.graphics.getHeight()) * HEIGHT;
                         bullet = new Bullet(ID, thisPlayer.getPositionX(), thisPlayer.getPositionY(), x_metres, y_metres, AUTO_AIM);
 
-
                         /**Server code for bullet**/
-
                         // Records bullet data
-
                         try{
                             // bullet data
                             bullet_data.put("ID", ID);
@@ -244,8 +235,6 @@ public class GameScreen implements Screen {
                         catch (java.lang.NullPointerException exception){
                             Gdx.app.log("SocketIO","Error sending bullet update data");
                         }
-
-
                     }
                     bullet.addBulletToWorld(world);
                 }
@@ -356,7 +345,12 @@ public class GameScreen implements Screen {
         return new Vector2(temp.x, temp.y);
     }
     private void updateBodies() {
-
+        if(server.newBullet) {
+            Bullet bullet;
+            bullet = new Bullet(server.bullet_ID, server.bullet_sourceX, server.bullet_sourceY, server.bullet_targetX, server.bullet_targetY, server.bullet_AUTO_AIM);
+            bullet.addBulletToWorld(world);
+            server.newBullet = false;
+        }
         if(world.getBodyCount() > 0) {
             Array<Body> bodies = new Array<Body>();
             world.getBodies(bodies);
