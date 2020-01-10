@@ -250,8 +250,8 @@ public class GameScreen implements Screen {
         try{
             data.put("positionX", thisPlayer.getPositionX());
             data.put("positionY", thisPlayer.getPositionY());
-            data.put("velocityX", thisPlayer.getVelocityX());
-            data.put("velocityY", thisPlayer.getVelocityY());
+            data.put("velocityX", thisPlayer.getMovementX());
+            data.put("velocityY", thisPlayer.getMovementY());
             server.getSocket().emit("playerMoved", data);
         }
         catch (JSONException e){
@@ -280,7 +280,7 @@ public class GameScreen implements Screen {
             thisPlayer.moveUsingAccelerometer(temp.x, temp.y);
         }
         thisPlayer.playerBody.applyForceToCenter(thisPlayer.movement, true); //move the player
-        opponentPlayer.playerBody.applyLinearImpulse(server.opponent_velocity.x, server.opponent_velocity.y, opponentPlayer.getPositionX(), opponentPlayer.getPositionY(), true);
+        opponentPlayer.playerBody.applyForceToCenter(server.opponent_movement,true);
         world.step(TIMESTEP, VELOCITYITERATIONS, POSITIONITERATIONS); //simulate the physics
 
         /**Centre camera about player**/

@@ -21,7 +21,7 @@ public class Server {
 
     // position and velocity of other player
     public Vector2 opponent_position = new Vector2();
-    public Vector2 opponent_velocity = new Vector2();
+    public Vector2 opponent_movement = new Vector2();
 
     public Server(PlayerBody p) {
         thisPlayer = p;
@@ -118,8 +118,8 @@ public class Server {
 
                     opponent_position.x = positionX.floatValue();
                     opponent_position.y = positionY.floatValue();
-                    opponent_velocity.x = velocityX.floatValue();
-                    opponent_velocity.y = velocityY.floatValue();
+                    opponent_movement.x = velocityX.floatValue();
+                    opponent_movement.y = velocityY.floatValue();
 
                     // print to console
                     //System.out.println ("opponent_pos: " + opponent_position.x + " " + opponent_position.y);

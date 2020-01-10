@@ -97,11 +97,11 @@ public class PlayerBody {
     public float getPositionY() {
         return playerBody.getPosition().y;
     }
-    public float getVelocityX() {
-        return playerBody.getLinearVelocity().x;
+    public float getMovementX() {
+        return movement.x;
     }
-    public float getVelocityY() {
-        return playerBody.getLinearVelocity().y;
+    public float getMovementY() {
+        return movement.y;
     }
 
     public void draw(SpriteBatch batch) {
