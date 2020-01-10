@@ -1,4 +1,5 @@
 package com.clash;
+import com.clash.server.Server;
 
 import com.badlogic.gdx.*;
 import com.badlogic.gdx.graphics.GL20;
@@ -15,7 +16,7 @@ import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
-import com.clash.server.Server;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -62,7 +63,6 @@ public class GameScreen implements Screen {
     /**Server Variables**/
     Server server;
     private int ID; //1 or 2
-    public static boolean p2_connected = false;
 
     @Override
     public void show() {
@@ -297,11 +297,8 @@ public class GameScreen implements Screen {
 
 
         /**Server Code**/
-
-        // Tracks opponent
-
+        // Updating server here
         JSONObject data = new JSONObject();
-
         try{
             // movement data
             data.put("positionX", thisPlayer.getPositionX());
@@ -359,6 +356,7 @@ public class GameScreen implements Screen {
         return new Vector2(temp.x, temp.y);
     }
     private void updateBodies() {
+
         if(world.getBodyCount() > 0) {
             Array<Body> bodies = new Array<Body>();
             world.getBodies(bodies);
