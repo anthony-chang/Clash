@@ -329,6 +329,7 @@ public class GameScreen implements Screen {
             thisPlayer.moveUsingAccelerometer(temp.x, temp.y);
         }
         thisPlayer.playerBody.applyForceToCenter(thisPlayer.movement, true); //move the player
+        opponentPlayer.playerBody.setTransform(server.opponent_position, 0);
         opponentPlayer.playerBody.applyForceToCenter(server.opponent_movement,true);
         world.step(TIMESTEP, VELOCITYITERATIONS, POSITIONITERATIONS); //simulate the physics
 
