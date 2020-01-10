@@ -19,9 +19,10 @@ public class Server {
     int simpleID;
     String socketID;
 
-    // position and velocity of other player
+    // position, movement and health of other player
     public Vector2 opponent_position = new Vector2();
     public Vector2 opponent_movement = new Vector2();
+    public int opponent_health;
 
     public Server(PlayerBody p) {
         thisPlayer = p;
@@ -111,6 +112,7 @@ public class Server {
                 JSONObject data = (JSONObject) args[0];
 
                 try{
+                    // movement
                     Double positionX = data.getDouble("positionX");
                     Double positionY = data.getDouble("positionY");
                     Double velocityX = data.getDouble("velocityX");
@@ -121,7 +123,13 @@ public class Server {
                     opponent_movement.x = velocityX.floatValue();
                     opponent_movement.y = velocityY.floatValue();
 
+                    // health
+                    int health = data.getInt("health");
+
+                    opponent_health = health;
+
                     // print to console
+                    //System.out.println("opponent_health: " + opponent_health);
                     //System.out.println ("opponent_pos: " + opponent_position.x + " " + opponent_position.y);
                 }
                 catch(JSONException e){
