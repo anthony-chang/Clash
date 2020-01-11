@@ -17,6 +17,7 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -299,14 +300,27 @@ public class GameScreen implements Screen {
             data.put("health", thisPlayer.getHealth());
 
             // obstacle data
+            JSONArray obstacles = new JSONArray();
+
             for(Body i:obstacleBodies) {
-                //send in
+                // place single obstacle data as JSONObject within JSONArray
                 int obstacleID = Integer.parseInt(((String)i.getUserData()).substring("OBSTACLE".length()));
-                data.put("obstacleID", obstacleID);
-                data.put("obstacleX", i.getPosition().x);
-                data.put("obstacleY", i.getPosition().y);
-                data.put("obstacleAngle", i.getAngle());
+                JSONObject single_obstacle = new JSONObject();
+
+                single_obstacle.put("ID", obstacleID);
+                single_obstacle.put("posX", i.getPosition().x);
+                single_obstacle.put("posY", i.getPosition().y);
+                single_obstacle.put("angle", i.getAngle());
+
+                obstacles.put(single_obstacle);
+
+                // print to console
+                //System.out.println(i.getPosition().x + ", " + i.getPosition().y);
+
+
             }
+
+            data.put("obstacles", obstacles);
 
             server.getSocket().emit("playerMoved", data);
         }

@@ -5,9 +5,12 @@ import com.clash.PlayerBody;
 import io.socket.client.IO;
 import io.socket.client.Socket;
 import io.socket.emitter.Emitter;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.badlogic.gdx.math.Vector2;
+
+import java.util.Iterator;
 
 public class Server {
     PlayerBody thisPlayer, opponentPlayer;
@@ -32,6 +35,9 @@ public class Server {
     public float bullet_targetY;
     public boolean bullet_AUTO_AIM;
     public boolean newBullet = false;
+
+    // obstacles
+    public ObstacleData[] obstacleData;
 
     public Server(PlayerBody p) {
         thisPlayer = p;
@@ -137,11 +143,28 @@ public class Server {
                     opponent_health = health;
 
                     // obstacles
+                    JSONArray obstacles = (JSONArray) data.get("obstacles");
+                    obstacleData = new ObstacleData[obstacles.length()];
 
+                    for (int i = 0; i < obstacles.length(); i++){
+                        ObstacleData single_obstacle = new ObstacleData();
+                        JSONObject single_obstacle_json = obstacles.getJSONObject(i);
+
+                        single_obstacle.obstacle_ID = single_obstacle_json.getInt("ID");
+                        single_obstacle.obstacle_posX = (float) single_obstacle_json.getDouble("posX");
+                        single_obstacle.obstacle_posY = (float) single_obstacle_json.getDouble("posY");
+                        single_obstacle.obstacle_angle = (float) single_obstacle_json.getDouble("angle");
+
+                        System.out.println(single_obstacle.obstacle_posX);
+
+                        obstacleData[i] = single_obstacle;
+                    }
 
                     // print to console
-                    //System.out.println("opponent_health: " + opponent_health);
-                    //System.out.println ("opponent_pos: " + opponent_position.x + " " + opponent_position.y);
+                    //System.out.println(obstacleData[0].obstacle_ID);
+                    //System.out.println(obstacleData[0].obstacle_posX);
+                    //System.out.println(obstacleData[0].obstacle_posY);
+                    //System.out.println(obstacleData[0].obstacle_angle);
                 }
                 catch(JSONException e){
                     Gdx.app.log("SocketIO","Error getting playerMoved data");
@@ -169,11 +192,9 @@ public class Server {
                     bullet_targetY = (float) bullet_targetY_0;
 
                     // print to console
-                    //System.out.println("opponent_health: " + opponent_health);
-                    //System.out.println ("opponent_pos: " + opponent_position.x + " " + opponent_position.y);
-                    System.out.println(bullet_sourceX + ", " + bullet_sourceY);
-                    System.out.println(bullet_targetX + ", " + bullet_targetY);
-                    System.out.println("--------------------------------------");
+                    //System.out.println(bullet_sourceX + ", " + bullet_sourceY);
+                    //System.out.println(bullet_targetX + ", " + bullet_targetY);
+                    //System.out.println("--------------------------------------");
                 }
                 catch(JSONException e){
                     Gdx.app.log("SocketIO","Error getting bulletShot data");
@@ -201,4 +222,15 @@ public class Server {
     public Socket getSocket(){
         return socket;
     }
+
+    public ObstacleData[] getObstacleData() {
+        return obstacleData;
+    }
+}
+
+class ObstacleData {
+    public int obstacle_ID;
+    public float obstacle_posX;
+    public float obstacle_posY;
+    public float obstacle_angle;
 }

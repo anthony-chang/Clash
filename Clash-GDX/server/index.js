@@ -25,8 +25,11 @@ io.on('connection', function(socket){
     // playerMoved Event
     socket.on('playerMoved', function(data){
         data.id = socket.id;
+
+        // sends JSON file to all other clients
         socket.broadcast.emit('playerMoved', data);
 
+        // players is updated but unused
         /**
          * uncomment for testing purposes
         console.log("playerMoved: " + "ID: " + data.id
@@ -35,7 +38,6 @@ io.on('connection', function(socket){
                                     + " movementX: " + data.movementX
                                     + " movementY: " + data.movementY);
         **/
-
         // update players
         for (var i = 0; i < players.length; i++) {
             if (players[i].id === data.id) {
