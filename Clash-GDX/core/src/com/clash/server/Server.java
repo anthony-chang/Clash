@@ -134,8 +134,10 @@ public class Server {
 
                     // health
                     int health = data.getInt("health");
-
                     opponent_health = health;
+
+                    // obstacles
+
 
                     // print to console
                     //System.out.println("opponent_health: " + opponent_health);

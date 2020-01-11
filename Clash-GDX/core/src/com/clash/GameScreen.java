@@ -301,9 +301,9 @@ public class GameScreen implements Screen {
             // obstacle data
             for(Body i:obstacleBodies) {
                 //send in
-                //i.getPosition().x;
-                //i.getPosition().y;
-                //i.getAngle();
+                data.put("obstacleX", i.getPosition().x);
+                data.put("obstacleY", i.getPosition().y);
+                data.put("obstacleAngle", i.getAngle());
             }
 
             server.getSocket().emit("playerMoved", data);
