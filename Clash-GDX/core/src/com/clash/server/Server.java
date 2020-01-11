@@ -38,6 +38,7 @@ public class Server {
 
     // obstacles
     public ObstacleData[] obstacleData;
+    public float obstacleDataFloats;
 
     public Server(PlayerBody p) {
         thisPlayer = p;
@@ -225,6 +226,12 @@ public class Server {
 
     public ObstacleData[] getObstacleData() {
         return obstacleData;
+    }
+
+    public void obstacleToArray() {
+        for (int i = 0; i < obstacleData.length; i++){
+
+        }
     }
 }
 
