@@ -301,6 +301,8 @@ public class GameScreen implements Screen {
             // obstacle data
             for(Body i:obstacleBodies) {
                 //send in
+                int obstacleID = Integer.parseInt(((String)i.getUserData()).substring("OBSTACLE".length()));
+                data.put("obstacleID", obstacleID);
                 data.put("obstacleX", i.getPosition().x);
                 data.put("obstacleY", i.getPosition().y);
                 data.put("obstacleAngle", i.getAngle());
@@ -382,7 +384,7 @@ public class GameScreen implements Screen {
                         opponentPlayer.playerBody.setUserData("PLAYER2");
                     }
                 }
-                else if(bodies.get(i).getUserData().equals("OBSTACLE")) {
+                else if(((String)bodies.get(i).getUserData()).contains("OBSTACLE")) {
                     obstacleBodies.add(bodies.get(i));
                 }
 

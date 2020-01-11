@@ -39,7 +39,7 @@ public class Obstacle {
     }
     public void addObstacleToWorld(World world) {
         obstacleBody = world.createBody(obstacleBodyDef);
-        obstacleBody.setUserData("OBSTACLE");
+        obstacleBody.setUserData("OBSTACLE" + ID);
         obstacleBody.createFixture(obstacleFixtureDef);
     }
 }
