@@ -45,6 +45,7 @@ public class GameScreen implements Screen {
 
     /**Game objects**/
     private World world;
+    private Array<Body> obstacleBodies = new Array<Body>();
     private Box2DDebugRenderer debugRenderer;
     private OrthographicCamera viewCamera;
     private Viewport viewPort;
@@ -108,7 +109,6 @@ public class GameScreen implements Screen {
         border = new Wall(WIDTH, HEIGHT);
         border.addWallWorld(world);
 
-        //create the map using the JSON files
         if (LevelMenu.getMap() == "Sieve"){
             map = new MapGenerator("maps/map_1.json");
         }
@@ -298,8 +298,13 @@ public class GameScreen implements Screen {
             // health data
             data.put("health", thisPlayer.getHealth());
 
-            // print to console
-            //System.out.println("my health: " + thisPlayer.getHealth());
+            // obstacle data
+            for(Body i:obstacleBodies) {
+                //send in
+                //i.getPosition().x;
+                //i.getPosition().y;
+                //i.getAngle();
+            }
 
             server.getSocket().emit("playerMoved", data);
         }
@@ -376,6 +381,9 @@ public class GameScreen implements Screen {
                         --opponentPlayer.health;
                         opponentPlayer.playerBody.setUserData("PLAYER2");
                     }
+                }
+                else if(bodies.get(i).getUserData().equals("OBSTACLE")) {
+                    obstacleBodies.add(bodies.get(i));
                 }
 
                 if(thisPlayer.health == 0) {

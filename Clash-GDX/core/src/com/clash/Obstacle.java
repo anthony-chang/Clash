@@ -8,8 +8,11 @@ public class Obstacle {
     BodyDef obstacleBodyDef;
     FixtureDef obstacleFixtureDef;
     PolygonShape obstacleShape;
+    int ID;
 
-    public Obstacle(int x, int y, int width, int height) {
+    public Obstacle(int num, int x, int y, int width, int height) {
+        ID = num;
+
         //obstacle body definitions
         obstacleBodyDef = new BodyDef();
         obstacleBodyDef.type = BodyDef.BodyType.DynamicBody;
