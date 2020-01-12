@@ -21,7 +21,8 @@ The coordinate corresponds to the center of the object.
 width and height:
 Note that the object "expands" from the center of the object
 
-
+Two client local testing
+------------------
 Running two instances of the same class (intelliJ)
 - Go to Edit Configurations, click '+' and create a Compound Run Configuration
 - Place two Desktop Configurations (identical) into the Compound Run Configuration
@@ -29,9 +30,7 @@ Running two instances of the same class (intelliJ)
 
 ------------------
 
-#### Todo for server stuff
-- Wait to display gamescreen until after 2 clients connected
-- Assign clients player1 and player2, create the PlayerBody based on that
-- store positions of  players on Server.java and index.js
-- run 2 seperate physics on the clients (hopefully they'll keep decently in sync)
-- bullet create call that relays postision and velocity vector of new bullets
+#### Todo
+- deploy node server off of localhost
+- p1 generates a lobby code 
+- create screen to enter lobby code to join a room
