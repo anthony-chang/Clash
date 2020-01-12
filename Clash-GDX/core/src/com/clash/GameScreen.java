@@ -462,5 +462,4 @@ public class GameScreen implements Screen {
             world.destroyBody(array.get(i));
         }
     }
-
 }
