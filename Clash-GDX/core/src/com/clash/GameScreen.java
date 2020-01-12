@@ -66,8 +66,7 @@ public class GameScreen implements Screen {
     /**Server Variables**/
     Server server;
     private int ID; //1 or 2
-    private float syncTime = 0;
-    private float syncInterval = 1;
+    boolean firstPass = true;
 
     @Override
     public void show() {
@@ -97,12 +96,16 @@ public class GameScreen implements Screen {
         server.configSocketEvents();
         while(server.getTotalPlayers() < 2){
             System.out.println("Waiting for player to connect");
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         }  //wait for 2 players to connect to start
         do {
             ID = server.getSimpleID();
             System.out.println("My ID is: " + ID);
         } while(ID != 1 && ID != 2);
-
         /**End of Server code**/
 
         /**Set up the objects in the world**/
@@ -141,6 +144,13 @@ public class GameScreen implements Screen {
         for(Obstacle i : map.obstacles) {
             i.addObstacleToWorld(world);
             obstacleBodies.add(i.obstacleBody);
+        }
+        if(ID == 2) {
+            try {
+                sendState();
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
         }
 
         /**inline input processor functions**/
@@ -289,13 +299,13 @@ public class GameScreen implements Screen {
                     bulletHeight);
         hud.end();
 
-
         /**Server Code**/
-        // Updating server here
+        if(firstPass && ID == 1) {
+            receiveState();
+            firstPass = false;
+        }
 
         JSONObject data = new JSONObject();
-        JSONObject obs_data = new JSONObject();
-
         try {
             // movement data
             data.put("positionX", thisPlayer.getPositionX());
@@ -305,39 +315,7 @@ public class GameScreen implements Screen {
 
             // health data
             data.put("health", thisPlayer.getHealth());
-
-            if (ID == 1) {
-                // obstacle data
-                JSONArray obstacles = new JSONArray();
-                int ind = 0;
-                for (Body i : obstacleBodies) {
-                    // place single obstacle data as JSONObject within JSONArray
-                    JSONObject single_obstacle = new JSONObject();
-                    single_obstacle.put("ID", ind++);
-                    single_obstacle.put("posX", i.getPosition().x);
-                    single_obstacle.put("posY", i.getPosition().y);
-                    single_obstacle.put("angle", i.getAngle());
-
-                    obstacles.put(single_obstacle);
-                    // print to console
-                    //System.out.println(i.getPosition().x + ", " + i.getPosition().y);
-                }
-                obs_data.put("obstacles", obstacles);
-            }
-            if(syncTime > syncInterval && ID == 2) {
-                syncTime = 0;
-                for (int i = 0; i < obstacleBodies.size; ++i) {
-                    try {
-                        if(obstacleBodies.get(i).getLinearVelocity().len2() < 0.1) {
-                            obstacleBodies.get(i).setTransform(server.obstacleData[i].obstacle_posX,
-                                    server.obstacleData[i].obstacle_posY,
-                                    server.obstacleData[i].obstacle_angle);
-                        }
-                    } catch (Exception ignored) {}
-                }
-            }
             server.getSocket().emit("playerMoved", data);
-            server.getSocket().emit("obstacleMoved", obs_data);
 
         } catch (JSONException e) {
             Gdx.app.log("SocketIO", "Error sending update data");
@@ -357,7 +335,6 @@ public class GameScreen implements Screen {
         updateBodies(); //clear the screen of bullets that have collided with things, and update player health
 
         float deltaTime = Gdx.graphics.getRawDeltaTime();
-        syncTime += deltaTime;
         thisPlayer.updateAmmo(deltaTime); //update the ammo of the players
 
         if(accelerometerAvailable) { //mobile controls
@@ -430,6 +407,37 @@ public class GameScreen implements Screen {
         }
     }
 
+    private void sendState() throws JSONException {
+        JSONObject obs_data = new JSONObject();
+        // obstacle data
+        JSONArray obstacles = new JSONArray();
+        int ind = 0;
+        for (Body i : obstacleBodies) {
+            // place single obstacle data as JSONObject within JSONArray
+            JSONObject single_obstacle = new JSONObject();
+            single_obstacle.put("ID", ind++);
+            single_obstacle.put("posX", i.getPosition().x);
+            single_obstacle.put("posY", i.getPosition().y);
+            single_obstacle.put("angle", i.getAngle());
+
+            obstacles.put(single_obstacle);
+            // print to console
+            //System.out.println(i.getPosition().x + ", " + i.getPosition().y);
+        }
+        obs_data.put("obstacles", obstacles);
+        server.getSocket().emit("obstacleMoved", obs_data);
+    }
+    void receiveState() {
+        for (int i = 0; i < obstacleBodies.size; ++i) {
+            try {
+                if(obstacleBodies.get(i).getLinearVelocity().len2() < 0.1) {
+                    obstacleBodies.get(i).setTransform(server.obstacleData[i].obstacle_posX,
+                            server.obstacleData[i].obstacle_posY,
+                            server.obstacleData[i].obstacle_angle);
+                }
+            } catch (Exception ignored) {}
+        }
+    }
     @Override
     public void resize(int width, int height) {
         viewPort.update(width, height, true);

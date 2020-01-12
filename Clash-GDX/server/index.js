@@ -21,6 +21,9 @@ io.on('connection', function(socket){
     socket.on('bulletShot', function(data){
         socket.broadcast.emit('bulletShot', data);
     });
+    socket.on('obstacleMoved', function(data){
+        socket.broadcast.emit('obstacleMoved', data);
+    });
 
     // playerMoved Event
     socket.on('playerMoved', function(data){
@@ -28,9 +31,6 @@ io.on('connection', function(socket){
 
         // sends JSON file to all other clients
         socket.broadcast.emit('playerMoved', data);
-
-        // sends JSON file of obstacles to all other clients
-        socket.broadcast.emit('obstacleMoved', data);
 
         // players is updated but unused
         /**

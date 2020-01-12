@@ -182,7 +182,6 @@ public class Server {
             @Override
             public void call(Object... args) {
                 JSONObject data = (JSONObject) args[0];
-
                 try{
                     // obstacles
                     JSONArray obstacles = (JSONArray) data.get("obstacles");
@@ -198,10 +197,11 @@ public class Server {
                         single_obstacle.obstacle_angle = (float) single_obstacle_json.getDouble("angle");
 
                         obstacleData[i] = single_obstacle;
+                        //System.out.println(single_obstacle.obstacle_posX + ", " + single_obstacle.obstacle_posY);
                     }
                 }
                 catch(JSONException e){
-                    //Gdx.app.log("SocketIO","Error getting playerMoved data");
+                    Gdx.app.log("SocketIO","Error getting obstacleMoved data");
                 }
 
             }
