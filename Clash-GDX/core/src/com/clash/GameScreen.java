@@ -1,4 +1,5 @@
 package com.clash;
+import com.badlogic.gdx.utils.Json;
 import com.clash.server.Server;
 
 import com.badlogic.gdx.*;
@@ -293,6 +294,8 @@ public class GameScreen implements Screen {
         // Updating server here
 
         JSONObject data = new JSONObject();
+        JSONObject obs_data = new JSONObject();
+
         try {
             // movement data
             data.put("positionX", thisPlayer.getPositionX());
@@ -302,6 +305,7 @@ public class GameScreen implements Screen {
 
             // health data
             data.put("health", thisPlayer.getHealth());
+
             if (ID == 1) {
                 // obstacle data
                 JSONArray obstacles = new JSONArray();
@@ -318,7 +322,7 @@ public class GameScreen implements Screen {
                     // print to console
                     //System.out.println(i.getPosition().x + ", " + i.getPosition().y);
                 }
-                data.put("obstacles", obstacles);
+                obs_data.put("obstacles", obstacles);
             }
             if(syncTime > syncInterval && ID == 2) {
                 syncTime = 0;
@@ -333,6 +337,8 @@ public class GameScreen implements Screen {
                 }
             }
             server.getSocket().emit("playerMoved", data);
+            server.getSocket().emit("obstacleMoved", obs_data);
+
         } catch (JSONException e) {
             Gdx.app.log("SocketIO", "Error sending update data");
         } catch (java.lang.NullPointerException exception) {
