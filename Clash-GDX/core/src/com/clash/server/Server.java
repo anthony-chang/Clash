@@ -142,28 +142,6 @@ public class Server {
                     // health
                     int health = data.getInt("health");
                     opponent_health = health;
-
-                    // obstacles
-                    JSONArray obstacles = (JSONArray) data.get("obstacles");
-                    obstacleData = new ObstacleData[obstacles.length()];
-
-                    for (int i = 0; i < obstacles.length(); i++){
-                        ObstacleData single_obstacle = new ObstacleData();
-                        JSONObject single_obstacle_json = obstacles.getJSONObject(i);
-
-                        single_obstacle.obstacle_ID = single_obstacle_json.getInt("ID");
-                        single_obstacle.obstacle_posX = (float) single_obstacle_json.getDouble("posX");
-                        single_obstacle.obstacle_posY = (float) single_obstacle_json.getDouble("posY");
-                        single_obstacle.obstacle_angle = (float) single_obstacle_json.getDouble("angle");
-
-                        obstacleData[i] = single_obstacle;
-                    }
-
-                    // print to console
-                    //System.out.println(obstacleData[0].obstacle_ID);
-                    //System.out.println(obstacleData[0].obstacle_posX);
-                    //System.out.println(obstacleData[0].obstacle_posY);
-                    //System.out.println(obstacleData[0].obstacle_angle);
                 }
                 catch(JSONException e){
                     //Gdx.app.log("SocketIO","Error getting playerMoved data");
@@ -197,6 +175,33 @@ public class Server {
                 }
                 catch(JSONException e){
                     Gdx.app.log("SocketIO","Error getting bulletShot data");
+                }
+
+            }
+        }).on("obstacleMoved", new Emitter.Listener() {
+            @Override
+            public void call(Object... args) {
+                JSONObject data = (JSONObject) args[0];
+
+                try{
+                    // obstacles
+                    JSONArray obstacles = (JSONArray) data.get("obstacles");
+                    obstacleData = new ObstacleData[obstacles.length()];
+
+                    for (int i = 0; i < obstacles.length(); i++){
+                        ObstacleData single_obstacle = new ObstacleData();
+                        JSONObject single_obstacle_json = obstacles.getJSONObject(i);
+
+                        single_obstacle.obstacle_ID = single_obstacle_json.getInt("ID");
+                        single_obstacle.obstacle_posX = (float) single_obstacle_json.getDouble("posX");
+                        single_obstacle.obstacle_posY = (float) single_obstacle_json.getDouble("posY");
+                        single_obstacle.obstacle_angle = (float) single_obstacle_json.getDouble("angle");
+
+                        obstacleData[i] = single_obstacle;
+                    }
+                }
+                catch(JSONException e){
+                    //Gdx.app.log("SocketIO","Error getting playerMoved data");
                 }
 
             }
