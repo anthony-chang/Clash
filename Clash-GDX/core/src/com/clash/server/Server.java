@@ -156,8 +156,6 @@ public class Server {
                         single_obstacle.obstacle_posY = (float) single_obstacle_json.getDouble("posY");
                         single_obstacle.obstacle_angle = (float) single_obstacle_json.getDouble("angle");
 
-                        System.out.println(single_obstacle.obstacle_posX);
-
                         obstacleData[i] = single_obstacle;
                     }
 
@@ -168,7 +166,7 @@ public class Server {
                     //System.out.println(obstacleData[0].obstacle_angle);
                 }
                 catch(JSONException e){
-                    Gdx.app.log("SocketIO","Error getting playerMoved data");
+                    //Gdx.app.log("SocketIO","Error getting playerMoved data");
                 }
 
             }
@@ -233,11 +231,4 @@ public class Server {
 
         }
     }
-}
-
-class ObstacleData {
-    public int obstacle_ID;
-    public float obstacle_posX;
-    public float obstacle_posY;
-    public float obstacle_angle;
 }

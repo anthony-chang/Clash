@@ -65,6 +65,8 @@ public class GameScreen implements Screen {
     /**Server Variables**/
     Server server;
     private int ID; //1 or 2
+    private float syncTime = 0;
+    private float syncInterval = 1;
 
     @Override
     public void show() {
@@ -137,6 +139,7 @@ public class GameScreen implements Screen {
         }
         for(Obstacle i : map.obstacles) {
             i.addObstacleToWorld(world);
+            obstacleBodies.add(i.obstacleBody);
         }
 
         /**inline input processor functions**/
@@ -288,8 +291,9 @@ public class GameScreen implements Screen {
 
         /**Server Code**/
         // Updating server here
+
         JSONObject data = new JSONObject();
-        try{
+        try {
             // movement data
             data.put("positionX", thisPlayer.getPositionX());
             data.put("positionY", thisPlayer.getPositionY());
@@ -298,37 +302,41 @@ public class GameScreen implements Screen {
 
             // health data
             data.put("health", thisPlayer.getHealth());
+            if (ID == 1) {
+                // obstacle data
+                JSONArray obstacles = new JSONArray();
+                int ind = 0;
+                for (Body i : obstacleBodies) {
+                    // place single obstacle data as JSONObject within JSONArray
+                    JSONObject single_obstacle = new JSONObject();
+                    single_obstacle.put("ID", ind++);
+                    single_obstacle.put("posX", i.getPosition().x);
+                    single_obstacle.put("posY", i.getPosition().y);
+                    single_obstacle.put("angle", i.getAngle());
 
-            // obstacle data
-            JSONArray obstacles = new JSONArray();
-
-            for(Body i:obstacleBodies) {
-                // place single obstacle data as JSONObject within JSONArray
-                int obstacleID = Integer.parseInt(((String)i.getUserData()).substring("OBSTACLE".length()));
-                JSONObject single_obstacle = new JSONObject();
-
-                single_obstacle.put("ID", obstacleID);
-                single_obstacle.put("posX", i.getPosition().x);
-                single_obstacle.put("posY", i.getPosition().y);
-                single_obstacle.put("angle", i.getAngle());
-
-                obstacles.put(single_obstacle);
-
-                // print to console
-                //System.out.println(i.getPosition().x + ", " + i.getPosition().y);
-
-
+                    obstacles.put(single_obstacle);
+                    // print to console
+                    //System.out.println(i.getPosition().x + ", " + i.getPosition().y);
+                }
+                data.put("obstacles", obstacles);
             }
-
-            data.put("obstacles", obstacles);
-
+            if(syncTime > syncInterval && ID == 2) {
+                syncTime = 0;
+                for (int i = 0; i < obstacleBodies.size; ++i) {
+                    try {
+                        if(obstacleBodies.get(i).getLinearVelocity().len2() < 0.1) {
+                            obstacleBodies.get(i).setTransform(server.obstacleData[i].obstacle_posX,
+                                    server.obstacleData[i].obstacle_posY,
+                                    server.obstacleData[i].obstacle_angle);
+                        }
+                    } catch (Exception ignored) {}
+                }
+            }
             server.getSocket().emit("playerMoved", data);
-        }
-        catch (JSONException e){
+        } catch (JSONException e) {
             Gdx.app.log("SocketIO", "Error sending update data");
-        }
-        catch (java.lang.NullPointerException exception){
-            Gdx.app.log("SocketIO","Error sending update data");
+        } catch (java.lang.NullPointerException exception) {
+            Gdx.app.log("SocketIO", "Error sending update data");
         }
 
 
@@ -339,10 +347,11 @@ public class GameScreen implements Screen {
         opponentPlayer.draw(players);
         players.end();
 
-        /**Update player characteristics**/
+        /**Update body characteristics**/
         updateBodies(); //clear the screen of bullets that have collided with things, and update player health
 
         float deltaTime = Gdx.graphics.getRawDeltaTime();
+        syncTime += deltaTime;
         thisPlayer.updateAmmo(deltaTime); //update the ammo of the players
 
         if(accelerometerAvailable) { //mobile controls
