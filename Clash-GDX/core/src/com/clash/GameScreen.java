@@ -145,13 +145,6 @@ public class GameScreen implements Screen {
             i.addObstacleToWorld(world);
             obstacleBodies.add(i.obstacleBody);
         }
-        if(ID == 2) {
-            try {
-                sendState();
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-        }
 
         /**inline input processor functions**/
         Gdx.input.setInputProcessor(new InputProcessor() {
@@ -300,11 +293,6 @@ public class GameScreen implements Screen {
         hud.end();
 
         /**Server Code**/
-        if(firstPass && ID == 1) {
-            receiveState();
-            firstPass = false;
-        }
-
         JSONObject data = new JSONObject();
         try {
             // movement data
@@ -351,7 +339,6 @@ public class GameScreen implements Screen {
         viewCamera.update();
 
         debugRenderer.render(world, viewCamera.combined); //TODO remove later
-
     }
     private Vector2 calibrateAccelerometerXYZ(float x, float y, float z) {
         Vector3 temp = new Vector3(x, y, z);

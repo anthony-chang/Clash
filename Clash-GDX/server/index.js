@@ -25,6 +25,7 @@ io.on('connection', function(socket){
         socket.broadcast.emit('obstacleMoved', data);
     });
 
+
     // playerMoved Event
     socket.on('playerMoved', function(data){
         data.id = socket.id;
