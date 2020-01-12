@@ -10,7 +10,7 @@ public class PlayerBody {
     private int num;
     int health;
     final static int MAX_HEALTH = 6;
-    Body playerBody;
+    public Body playerBody;
     Vector2 movement = new Vector2();
     float speed = 8000;
     BodyDef playerBodyDef;
@@ -65,9 +65,6 @@ public class PlayerBody {
         playerBody.setUserData((num == 1) ? "PLAYER1":"PLAYER2");
         playerBody.createFixture(playerFixtureDef);
     }
-    public Vector2 getPositionMetres() { //get the player's position in metres, centred about centre
-        return playerBody.getPosition();
-    }
     public void move(int x, int y) {
         if(x != 0)
             movement.x = (x < 0) ? -speed:speed; //left:right
@@ -93,15 +90,32 @@ public class PlayerBody {
             return 1;
         return curTime/RELOAD_TIME;
     }
+
+    public float getPositionX() {
+        return playerBody.getPosition().x;
+    }
+    public float getPositionY() {
+        return playerBody.getPosition().y;
+    }
+    public float getMovementX() {
+        return movement.x;
+    }
+    public float getMovementY() {
+        return movement.y;
+    }
+    public int getHealth() {
+        return health;
+    }
+
     public void draw(SpriteBatch batch) {
         batch.draw(healthBar[health],
-                (float) (getPositionMetres().x - healthBar[health].getWidth()/10/2 * 1.1),
-                getPositionMetres().y + healthBar[health].getHeight()/10,
+                (float) (getPositionX() - healthBar[health].getWidth()/10/2 * 1.1),
+                getPositionY() + healthBar[health].getHeight()/10,
                 healthBar[health].getWidth()/10,
                 healthBar[health].getHeight()/10);
         batch.draw(playerTexture,
-                getPositionMetres().x - 3,
-                getPositionMetres().y - 3,
+                getPositionX() - 3,
+                getPositionY() - 3,
                 6,
                 6);
     }

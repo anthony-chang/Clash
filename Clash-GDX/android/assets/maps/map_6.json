@@ -22,31 +22,31 @@
   "Obstacles" : [
     {
       "x": 0,
-      "y": 0,
+      "y": 4,
       "width" : 3,
       "height": 3
     },
     {
       "x": 0,
-      "y": 3,
+      "y": 7,
       "width" : 3,
       "height": 3
     },
     {
       "x": 0,
-      "y": 6,
+      "y": 10,
       "width" : 3,
       "height": 3
     },
     {
       "x": 0,
-      "y": 9,
+      "y": 13,
       "width" : 3,
       "height": 3
     },
     {
       "x": 0,
-      "y": 12,
+      "y": 16,
       "width" : 3,
       "height": 3
     },

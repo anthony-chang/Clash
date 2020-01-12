@@ -8,8 +8,11 @@ public class Obstacle {
     BodyDef obstacleBodyDef;
     FixtureDef obstacleFixtureDef;
     PolygonShape obstacleShape;
+    int ID;
 
-    public Obstacle(int x, int y, int width, int height) {
+    public Obstacle(int num, int x, int y, int width, int height) {
+        ID = num;
+
         //obstacle body definitions
         obstacleBodyDef = new BodyDef();
         obstacleBodyDef.type = BodyDef.BodyType.DynamicBody;
@@ -25,7 +28,7 @@ public class Obstacle {
         obstacleFixtureDef = new FixtureDef();
         obstacleFixtureDef.shape = obstacleShape;
         obstacleFixtureDef.friction = 0;
-        obstacleFixtureDef.density = 3f;
+        obstacleFixtureDef.density = 5f;
         obstacleFixtureDef.restitution = 0.2f;
         obstacleFixtureDef.filter.categoryBits = GameScreen.CATEGORY_MAP;
         obstacleFixtureDef.filter.maskBits = GameScreen.CATEGORY_MAP |
@@ -36,7 +39,7 @@ public class Obstacle {
     }
     public void addObstacleToWorld(World world) {
         obstacleBody = world.createBody(obstacleBodyDef);
-        obstacleBody.setUserData("OBSTACLE");
+        obstacleBody.setUserData("OBSTACLE" + ID);
         obstacleBody.createFixture(obstacleFixtureDef);
     }
 }

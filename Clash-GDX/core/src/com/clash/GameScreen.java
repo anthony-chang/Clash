@@ -1,4 +1,6 @@
 package com.clash;
+import com.badlogic.gdx.utils.Json;
+import com.clash.server.Server;
 
 import com.badlogic.gdx.*;
 import com.badlogic.gdx.graphics.GL20;
@@ -9,14 +11,14 @@ import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Quaternion;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
-import com.badlogic.gdx.physics.box2d.*;
+import com.badlogic.gdx.physics.box2d.Body;
+import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
+import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
-import com.badlogic.gdx.Gdx;
-import io.socket.client.IO;
-import io.socket.client.Socket;
-import io.socket.emitter.Emitter;
+
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -45,10 +47,11 @@ public class GameScreen implements Screen {
 
     /**Game objects**/
     private World world;
+    private Array<Body> obstacleBodies = new Array<Body>();
     private Box2DDebugRenderer debugRenderer;
     private OrthographicCamera viewCamera;
     private Viewport viewPort;
-    private PlayerBody p1, p2;
+    private PlayerBody thisPlayer, opponentPlayer;
     private Wall border;
     private MapGenerator map;
 
@@ -61,7 +64,9 @@ public class GameScreen implements Screen {
     private Texture bulletTexture = new Texture("bullet.png");
 
     /**Server Variables**/
-    private Socket socket;
+    Server server;
+    private int ID; //1 or 2
+    boolean firstPass = true;
 
     @Override
     public void show() {
@@ -85,16 +90,32 @@ public class GameScreen implements Screen {
             Matrix4 mat = new Matrix4(Vector3.Zero, rotateQuaternion, new Vector3(1f, 1f, 1f));
             calibrationMatrix = mat.inv(); //invert the matrix so it can be applied later
         }
+        /** Server code**/
+        server = new Server(thisPlayer);
+        server.connectSocket();
+        server.configSocketEvents();
+        while(server.getTotalPlayers() < 2){
+            System.out.println("Waiting for player to connect");
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }  //wait for 2 players to connect to start
+        do {
+            ID = server.getSimpleID();
+            System.out.println("My ID is: " + ID);
+        } while(ID != 1 && ID != 2);
+        /**End of Server code**/
 
         /**Set up the objects in the world**/
-        p1 = new PlayerBody(1);
-        p1.addPlayerToWorld(world);
-        p2 = new PlayerBody(2);
-        p2.addPlayerToWorld(world);
+        thisPlayer = new PlayerBody(ID);
+        thisPlayer.addPlayerToWorld(world);
+        opponentPlayer = new PlayerBody((ID == 1) ? 2:1);
+        opponentPlayer.addPlayerToWorld(world);
         border = new Wall(WIDTH, HEIGHT);
         border.addWallWorld(world);
 
-        //create the map using the JSON files
         if (LevelMenu.getMap() == "Sieve"){
             map = new MapGenerator("maps/map_1.json");
         }
@@ -122,6 +143,7 @@ public class GameScreen implements Screen {
         }
         for(Obstacle i : map.obstacles) {
             i.addObstacleToWorld(world);
+            obstacleBodies.add(i.obstacleBody);
         }
 
         /**inline input processor functions**/
@@ -130,16 +152,16 @@ public class GameScreen implements Screen {
             public boolean keyDown(int keycode) {
                 switch (keycode) {
                     case Input.Keys.W:
-                        p1.move(0, 1);
+                        thisPlayer.move(0, 1);
                         break;
                     case Input.Keys.A:
-                        p1.move(-1, 0);
+                        thisPlayer.move(-1, 0);
                         break;
                     case Input.Keys.S:
-                        p1.move(0, -1);
+                        thisPlayer.move(0, -1);
                         break;
                     case Input.Keys.D:
-                        p1.move(1, 0);
+                        thisPlayer.move(1, 0);
                         break;
                 }
                 return false;
@@ -150,11 +172,11 @@ public class GameScreen implements Screen {
                 switch (keycode) {
                     case Input.Keys.W:
                     case Input.Keys.S:
-                        p1.movement.y = 0;
+                        thisPlayer.movement.y = 0;
                         break;
                     case Input.Keys.A:
                     case Input.Keys.D:
-                        p1.movement.x = 0;
+                        thisPlayer.movement.x = 0;
                         break;
                 }
                 return false;
@@ -167,28 +189,63 @@ public class GameScreen implements Screen {
 
             @Override
             public boolean touchDown(int screenX, int screenY, int pointer, int button) {
-                if(p1.ammo > 0) {
-                    --p1.ammo;
+                if(thisPlayer.ammo > 0) {
+                    --thisPlayer.ammo;
                     Bullet bullet;
+
+                    /**Server code for bullet**/
+                    JSONObject bullet_data = new JSONObject();
+
                     if(AUTO_AIM) {
-                        bullet = new Bullet(1, p1.getPositionMetres().x, p1.getPositionMetres().y, p2.getPositionMetres().x, p2.getPositionMetres().y, AUTO_AIM);
+                        bullet = new Bullet(ID, thisPlayer.getPositionX(), thisPlayer.getPositionY(), opponentPlayer.getPositionX(), opponentPlayer.getPositionY(), AUTO_AIM);
+                        /**Server code for bullet**/
+                        // Records bullet data
+                        try{
+                            // bullet data
+                            bullet_data.put("ID", ID);
+                            bullet_data.put("thisPlayerPositionX", thisPlayer.getPositionX());
+                            bullet_data.put("thisPlayerPositionY", thisPlayer.getPositionY());
+                            bullet_data.put("opponentPlayerPositionX", opponentPlayer.getPositionX());
+                            bullet_data.put("opponentPlayerPositionY", opponentPlayer.getPositionY());
+                            bullet_data.put("AUTO_AIM", AUTO_AIM);
+
+                            server.getSocket().emit("bulletShot", bullet_data);
+                        }
+                        catch (JSONException e){
+                            Gdx.app.log("SocketIO", "Error sending bullet update data");
+                        }
+                        catch (java.lang.NullPointerException exception){
+                            Gdx.app.log("SocketIO","Error sending bullet update data");
+                        }
                     }
                     else {
                         //convert mouse (x, y) in pixels (with origin at top left) to (x, y) in metres (with origin at centre)
                         float x_metres = ((float) screenX) / ((float) Gdx.graphics.getWidth()) * WIDTH - WIDTH / 2f;
                         float y_metres = HEIGHT / 2f - ((float) screenY) / ((float) Gdx.graphics.getHeight()) * HEIGHT;
-                        bullet = new Bullet(1, p1.getPositionMetres().x, p1.getPositionMetres().y, x_metres, y_metres, AUTO_AIM);
+                        bullet = new Bullet(ID, thisPlayer.getPositionX(), thisPlayer.getPositionY(), x_metres, y_metres, AUTO_AIM);
+
+                        /**Server code for bullet**/
+                        // Records bullet data
+                        try{
+                            // bullet data
+                            bullet_data.put("ID", ID);
+                            bullet_data.put("thisPlayerPositionX", thisPlayer.getPositionX());
+                            bullet_data.put("thisPlayerPositionY", thisPlayer.getPositionY());
+                            bullet_data.put("opponentPlayerPositionX", x_metres);
+                            bullet_data.put("opponentPlayerPositionY", y_metres);
+                            bullet_data.put("AUTO_AIM", AUTO_AIM);
+
+                            server.getSocket().emit("bulletShot", bullet_data);
+                        }
+                        catch (JSONException e){
+                            Gdx.app.log("SocketIO", "Error sending bullet update data");
+                        }
+                        catch (java.lang.NullPointerException exception){
+                            Gdx.app.log("SocketIO","Error sending bullet update data");
+                        }
                     }
                     bullet.addBulletToWorld(world);
                 }
-                /**Testing Player 2 bullets**/ //TODO remove later
-                //p2 just fires when p1 fires
-                //auto aim at player 1
-                /*if(p2.ammo > 0) {
-                    --p2.ammo;
-                    Bullet bullet2 = new Bullet(2, p2.getPositionMetres().x, p2.getPositionMetres().y, p1.getPositionMetres().x, p1.getPositionMetres().y, true);
-                    bullet2.addBulletToWorld(world);
-                }*/
                 return false;
             }
 
@@ -212,10 +269,6 @@ public class GameScreen implements Screen {
                 return false;
             }
         });
-
-        /** Server code**/
-        connectSocket();
-        configSocketEvents();
     }
 
     @Override
@@ -228,44 +281,64 @@ public class GameScreen implements Screen {
         hud.begin();
         //Ammo indicator
         int bulletWidth = bulletTexture.getWidth(), bulletHeight = bulletTexture.getHeight();
-        for(int i = 0; i < p1.ammo; ++i) { //draw the bullets images on the hud
+        for(int i = 0; i < thisPlayer.ammo; ++i) { //draw the bullets images on the hud
             hud.draw(bulletTexture, (int) (Gdx.graphics.getWidth() - (bulletWidth * 1.05)), i * bulletHeight);
         }
-        if(p1.ammo < p1.MAX_AMMO) //show part of a bullet for reload
-            hud.draw(bulletTexture, (int) (Gdx.graphics.getWidth() - (bulletWidth * 1.05)), p1.ammo * bulletHeight,
+        if(thisPlayer.ammo < thisPlayer.MAX_AMMO) //show part of a bullet for reload
+            hud.draw(bulletTexture, (int) (Gdx.graphics.getWidth() - (bulletWidth * 1.05)), thisPlayer.ammo * bulletHeight,
                     0,
                     0,
-                    (int) (bulletWidth*p1.getReloadPercentage()),
+                    (int) (bulletWidth* thisPlayer.getReloadPercentage()),
                     bulletHeight);
         hud.end();
+
+        /**Server Code**/
+        JSONObject data = new JSONObject();
+        try {
+            // movement data
+            data.put("positionX", thisPlayer.getPositionX());
+            data.put("positionY", thisPlayer.getPositionY());
+            data.put("velocityX", thisPlayer.getMovementX());
+            data.put("velocityY", thisPlayer.getMovementY());
+
+            // health data
+            data.put("health", thisPlayer.getHealth());
+            server.getSocket().emit("playerMoved", data);
+
+        } catch (JSONException e) {
+            Gdx.app.log("SocketIO", "Error sending update data");
+        } catch (java.lang.NullPointerException exception) {
+            Gdx.app.log("SocketIO", "Error sending update data");
+        }
+
 
         /**Render the players and their health bars**/
         players.setProjectionMatrix(viewCamera.combined);
         players.begin();
-        p1.draw(players);
-        p2.draw(players);
+        thisPlayer.draw(players);
+        opponentPlayer.draw(players);
         players.end();
 
-        /**Update player characteristics**/
+        /**Update body characteristics**/
         updateBodies(); //clear the screen of bullets that have collided with things, and update player health
 
         float deltaTime = Gdx.graphics.getRawDeltaTime();
-        p1.updateAmmo(deltaTime); //update the ammo of the players
-        p2.updateAmmo(deltaTime);
+        thisPlayer.updateAmmo(deltaTime); //update the ammo of the players
 
         if(accelerometerAvailable) { //mobile controls
             Vector2 temp = calibrateAccelerometerXYZ(Gdx.input.getAccelerometerX(), Gdx.input.getAccelerometerY(), Gdx.input.getAccelerometerZ());
-            p1.moveUsingAccelerometer(temp.x, temp.y);
+            thisPlayer.moveUsingAccelerometer(temp.x, temp.y);
         }
-        p1.playerBody.applyForceToCenter(p1.movement, true); //move the player
+        thisPlayer.playerBody.applyForceToCenter(thisPlayer.movement, true); //move the player
+        opponentPlayer.playerBody.setTransform(server.opponent_position, 0);
+        opponentPlayer.playerBody.applyForceToCenter(server.opponent_movement,true);
         world.step(TIMESTEP, VELOCITYITERATIONS, POSITIONITERATIONS); //simulate the physics
 
         /**Centre camera about player**/
-        viewCamera.position.set(p1.getPositionMetres().x, p1.getPositionMetres().y, 0);
+        viewCamera.position.set(thisPlayer.getPositionX(), thisPlayer.getPositionY(), 0);
         viewCamera.update();
 
         debugRenderer.render(world, viewCamera.combined); //TODO remove later
-
     }
     private Vector2 calibrateAccelerometerXYZ(float x, float y, float z) {
         Vector3 temp = new Vector3(x, y, z);
@@ -273,6 +346,12 @@ public class GameScreen implements Screen {
         return new Vector2(temp.x, temp.y);
     }
     private void updateBodies() {
+        if(server.newBullet) {
+            Bullet bullet;
+            bullet = new Bullet(server.bullet_ID, server.bullet_sourceX, server.bullet_sourceY, server.bullet_targetX, server.bullet_targetY, server.bullet_AUTO_AIM);
+            bullet.addBulletToWorld(world);
+            server.newBullet = false;
+        }
         if(world.getBodyCount() > 0) {
             Array<Body> bodies = new Array<Body>();
             world.getBodies(bodies);
@@ -281,19 +360,33 @@ public class GameScreen implements Screen {
                     world.destroyBody(bodies.get(i));
                 }
                 else if (bodies.get(i).getUserData().equals("PLAYER1_DECREMENT_HEALTH")) { //flagged player 1 as hit
-                    --p1.health;
-                    p1.playerBody.setUserData("PLAYER1");
+                    if(ID == 1) {
+                        --thisPlayer.health;
+                        thisPlayer.playerBody.setUserData("PLAYER1");
+                    } else if (ID == 2) {
+                        --opponentPlayer.health;
+                        opponentPlayer.playerBody.setUserData("PLAYER1");
+                    }
                 }
                 else if(bodies.get(i).getUserData().equals("PLAYER2_DECREMENT_HEALTH")) {//flagged player 2 as hit
-                    --p2.health;
-                    p2.playerBody.setUserData("PLAYER2");
+                    if(ID == 2) {
+                        --thisPlayer.health;
+                        thisPlayer.playerBody.setUserData("PLAYER2");
+                    } else if (ID == 1) {
+                        --opponentPlayer.health;
+                        opponentPlayer.playerBody.setUserData("PLAYER2");
+                    }
+                }
+                else if(((String)bodies.get(i).getUserData()).contains("OBSTACLE")) {
+                    obstacleBodies.add(bodies.get(i));
                 }
 
-                if(p1.health == 0) {
+                if(thisPlayer.health == 0) {
                     System.out.println("Player 2 wins");
                     ((Game)Gdx.app.getApplicationListener()).setScreen(new LevelMenu());
                 }
-                else if(p2.health == 0) {
+
+                else if(opponentPlayer.health == 0) {
                     System.out.println("Player 1 wins");
                     ((Game)Gdx.app.getApplicationListener()).setScreen(new LevelMenu());
                 }
@@ -301,6 +394,37 @@ public class GameScreen implements Screen {
         }
     }
 
+    private void sendState() throws JSONException {
+        JSONObject obs_data = new JSONObject();
+        // obstacle data
+        JSONArray obstacles = new JSONArray();
+        int ind = 0;
+        for (Body i : obstacleBodies) {
+            // place single obstacle data as JSONObject within JSONArray
+            JSONObject single_obstacle = new JSONObject();
+            single_obstacle.put("ID", ind++);
+            single_obstacle.put("posX", i.getPosition().x);
+            single_obstacle.put("posY", i.getPosition().y);
+            single_obstacle.put("angle", i.getAngle());
+
+            obstacles.put(single_obstacle);
+            // print to console
+            //System.out.println(i.getPosition().x + ", " + i.getPosition().y);
+        }
+        obs_data.put("obstacles", obstacles);
+        server.getSocket().emit("obstacleMoved", obs_data);
+    }
+    void receiveState() {
+        for (int i = 0; i < obstacleBodies.size; ++i) {
+            try {
+                if(obstacleBodies.get(i).getLinearVelocity().len2() < 0.1) {
+                    obstacleBodies.get(i).setTransform(server.obstacleData[i].obstacle_posX,
+                            server.obstacleData[i].obstacle_posY,
+                            server.obstacleData[i].obstacle_angle);
+                }
+            } catch (Exception ignored) {}
+        }
+    }
     @Override
     public void resize(int width, int height) {
         viewPort.update(width, height, true);
@@ -323,11 +447,12 @@ public class GameScreen implements Screen {
 
     @Override
     public void dispose() {
-        p1.playerShape.dispose();
-        for(Texture i:p1.healthBar)
+        thisPlayer.playerShape.dispose();
+        for(Texture i: thisPlayer.healthBar)
             i.dispose();
-        p2.playerShape.dispose();
-        for(Texture i:p2.healthBar)
+
+        opponentPlayer.playerShape.dispose();
+        for(Texture i: opponentPlayer.healthBar)
             i.dispose();
 
         bulletTexture.dispose();
@@ -337,48 +462,5 @@ public class GameScreen implements Screen {
         for (int i = 0; i < array.size; ++i) {
             world.destroyBody(array.get(i));
         }
-    }
-
-    public void connectSocket(){
-        try{
-            socket = IO.socket("http://localhost:8080");
-            socket.connect();
-        }
-        catch(Exception e){
-            e.printStackTrace();
-        }
-    }
-
-    public void configSocketEvents(){
-        socket.on(Socket.EVENT_CONNECT, new Emitter.Listener() {
-            @Override
-            public void call(Object... args) {
-                Gdx.app.log("SocketIO","Connected");
-            }
-        }).on("socketID", new Emitter.Listener() {
-            @Override
-            public void call(Object... args) {
-                JSONObject data = (JSONObject) args[0];
-                try {
-                    String id = data.getString("id");
-                    Gdx.app.log("SocketIO","My id: " + id);
-                }
-                catch (JSONException e){
-                    Gdx.app.log("SocketIO","Error getting ID");
-                }
-            }
-        }).on("newPlayer", new Emitter.Listener() {
-            @Override
-            public void call(Object... args) {
-                JSONObject data = (JSONObject) args[0];
-                try {
-                    String id = data.getString("id");
-                    Gdx.app.log("SocketIO","New Player Connect: " + id);
-                }
-                catch (JSONException e){
-                    Gdx.app.log("SocketIO","Error getting New PlayerID");
-                }
-            }
-        });
     }
 }

@@ -20,8 +20,10 @@ public class MapGenerator {
                     i.getInt("height")/2
             ));
         }
+        int cnt = 0;
         for(JsonValue i : base.get("Obstacles")) {
             obstacles.add(new Obstacle(
+                    cnt++,
                     i.getInt("x"),
                     i.getInt("y"),
                     i.getInt("width")/2,
