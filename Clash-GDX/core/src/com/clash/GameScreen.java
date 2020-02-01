@@ -64,8 +64,8 @@ public class GameScreen implements Screen {
     private Texture bulletTexture = new Texture("bullet.png");
 
     /**Server Variables**/
-    Server server;
-    private int ID; //1 or 2
+    //Server server;
+    private int ID = 1; //1 or 2
     boolean firstPass = true;
 
     @Override
@@ -91,7 +91,7 @@ public class GameScreen implements Screen {
             calibrationMatrix = mat.inv(); //invert the matrix so it can be applied later
         }
         /** Server code**/
-        server = new Server(thisPlayer);
+        /*server = new Server(thisPlayer);
         server.connectSocket();
         server.configSocketEvents();
         while(server.getTotalPlayers() < 2){
@@ -105,7 +105,7 @@ public class GameScreen implements Screen {
         do {
             ID = server.getSimpleID();
             System.out.println("My ID is: " + ID);
-        } while(ID != 1 && ID != 2);
+        } while(ID != 1 && ID != 2);*/
         /**End of Server code**/
 
         /**Set up the objects in the world**/
@@ -200,7 +200,7 @@ public class GameScreen implements Screen {
                         bullet = new Bullet(ID, thisPlayer.getPositionX(), thisPlayer.getPositionY(), opponentPlayer.getPositionX(), opponentPlayer.getPositionY(), AUTO_AIM);
                         /**Server code for bullet**/
                         // Records bullet data
-                        try{
+                        /*try{
                             // bullet data
                             bullet_data.put("ID", ID);
                             bullet_data.put("thisPlayerPositionX", thisPlayer.getPositionX());
@@ -216,7 +216,7 @@ public class GameScreen implements Screen {
                         }
                         catch (java.lang.NullPointerException exception){
                             Gdx.app.log("SocketIO","Error sending bullet update data");
-                        }
+                        }*/
                     }
                     else {
                         //convert mouse (x, y) in pixels (with origin at top left) to (x, y) in metres (with origin at centre)
@@ -226,7 +226,7 @@ public class GameScreen implements Screen {
 
                         /**Server code for bullet**/
                         // Records bullet data
-                        try{
+                        /*try{
                             // bullet data
                             bullet_data.put("ID", ID);
                             bullet_data.put("thisPlayerPositionX", thisPlayer.getPositionX());
@@ -242,7 +242,7 @@ public class GameScreen implements Screen {
                         }
                         catch (java.lang.NullPointerException exception){
                             Gdx.app.log("SocketIO","Error sending bullet update data");
-                        }
+                        }*/
                     }
                     bullet.addBulletToWorld(world);
                 }
@@ -293,7 +293,7 @@ public class GameScreen implements Screen {
         hud.end();
 
         /**Server Code**/
-        JSONObject data = new JSONObject();
+        /*JSONObject data = new JSONObject();
         try {
             // movement data
             data.put("positionX", thisPlayer.getPositionX());
@@ -309,7 +309,7 @@ public class GameScreen implements Screen {
             Gdx.app.log("SocketIO", "Error sending update data");
         } catch (java.lang.NullPointerException exception) {
             Gdx.app.log("SocketIO", "Error sending update data");
-        }
+        }*/
 
 
         /**Render the players and their health bars**/
@@ -330,8 +330,8 @@ public class GameScreen implements Screen {
             thisPlayer.moveUsingAccelerometer(temp.x, temp.y);
         }
         thisPlayer.playerBody.applyForceToCenter(thisPlayer.movement, true); //move the player
-        opponentPlayer.playerBody.setTransform(server.opponent_position, 0);
-        opponentPlayer.playerBody.applyForceToCenter(server.opponent_movement,true);
+        /*opponentPlayer.playerBody.setTransform(server.opponent_position, 0);
+        opponentPlayer.playerBody.applyForceToCenter(server.opponent_movement,true);*/
         world.step(TIMESTEP, VELOCITYITERATIONS, POSITIONITERATIONS); //simulate the physics
 
         /**Centre camera about player**/
@@ -346,12 +346,12 @@ public class GameScreen implements Screen {
         return new Vector2(temp.x, temp.y);
     }
     private void updateBodies() {
-        if(server.newBullet) {
+        /*if(server.newBullet) {
             Bullet bullet;
             bullet = new Bullet(server.bullet_ID, server.bullet_sourceX, server.bullet_sourceY, server.bullet_targetX, server.bullet_targetY, server.bullet_AUTO_AIM);
             bullet.addBulletToWorld(world);
             server.newBullet = false;
-        }
+        }*/
         if(world.getBodyCount() > 0) {
             Array<Body> bodies = new Array<Body>();
             world.getBodies(bodies);
@@ -394,7 +394,7 @@ public class GameScreen implements Screen {
         }
     }
 
-    private void sendState() throws JSONException {
+    /*private void sendState() throws JSONException {
         JSONObject obs_data = new JSONObject();
         // obstacle data
         JSONArray obstacles = new JSONArray();
@@ -424,7 +424,7 @@ public class GameScreen implements Screen {
                 }
             } catch (Exception ignored) {}
         }
-    }
+    }*/
     @Override
     public void resize(int width, int height) {
         viewPort.update(width, height, true);
